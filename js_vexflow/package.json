@@ -1,0 +1,22 @@
+{
+  "name": "js_vexflow",
+  "version": "0.1.0",
+  "description": "js vexflow",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mrk21",
+  "license": "MIT",
+  "dependencies": {
+    "vexflow": "^1.2.84"
+  },
+  "devDependencies": {
+    "babel-loader": "^7.1.4",
+    "webpack": "^4.9.1",
+    "webpack-cli": "^2.1.4",
+    "webpack-dev-server": "^3.1.4"
+  }
+}
