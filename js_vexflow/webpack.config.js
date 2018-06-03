@@ -1,11 +1,15 @@
 const path = require('path');
+const glob = require('glob');
 
 module.exports = {
   mode: 'development',
-  entry: './src/index.js',
+  entry: glob.sync('./src/*.js').reduce(function(memo, file) {
+    memo[path.basename(file, '.js')] = file;
+    return memo;
+  }, {}),
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'dist/bundle.js',
+    filename: '[name].js',
   },
   module: {
     rules: [

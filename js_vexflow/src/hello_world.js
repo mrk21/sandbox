@@ -7,8 +7,7 @@ const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
 renderer.resize(500, 500);
 
 // And get a drawing context:
-var context = renderer.getContext();
-
+const context = renderer.getContext();
 
 // Create a stave at position 10, 40 of width 400 on the canvas.
 const stave = new VF.Stave(10, 40, 400);
