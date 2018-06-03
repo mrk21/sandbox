@@ -2,39 +2,15 @@ import { Flow as VF } from 'vexflow';
 
 const container = document.getElementById('container');
 const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-renderer.resize(500, 500);
+renderer.resize(600, 200);
 const context = renderer.getContext();
 
-const stave = new VF.Stave(10, 40, 400);
+const stave = new VF.Stave(10, 40, 500);
 stave.addClef("treble").addTimeSignature("4/4");
 stave.setContext(context)
 stave.draw();
 
 const notes = [];
-
-document.getElementById('add_note').addEventListener('click', _ => {
-  notes.push(new VF.StaveNote({ clef: "treble", keys: ["c/4"], duration: "16" }));
-
-  const voice = new VF.Voice({num_beats: 4,  beat_value: 4});
-
-  const addedNotes = addNotes(voice, notes);
-  const beams = VF.Beam.generateBeams(addedNotes);
-  beams.forEach(beam => beam.setContext(context));
-  fillRestNotes(voice);
-
-  const formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
-
-  context.clear();
-  stave.draw();
-  voice.draw(context, stave);
-  beams.forEach(beam => beam.draw() );
-});
-
-document.getElementById('clear_note').addEventListener('click', _ => {
-  notes.splice(0);
-  context.clear();
-  stave.draw();
-});
 
 const fracValue = (frac) => 1.0 * frac.numerator / frac.denominator;
 
@@ -78,3 +54,33 @@ const fillRestNotes = (voice) => {
   }
   voice.addTickables(restNotes.reverse());
 };
+
+document.getElementById('add_note').addEventListener('click', _ => {
+  notes.push(new VF.StaveNote({ clef: "treble", keys: ["c/4"], duration: "16" }));
+  drawNotes(notes);
+});
+
+document.getElementById('clear_note').addEventListener('click', _ => {
+  notes.splice(0);
+  context.clear();
+  stave.draw();
+  drawNotes(notes);
+});
+
+const drawNotes = (notes) => {
+  const voice = new VF.Voice({num_beats: 4,  beat_value: 4});
+
+  const addedNotes = addNotes(voice, notes);
+  const beams = VF.Beam.generateBeams(addedNotes);
+  beams.forEach(beam => beam.setContext(context));
+  fillRestNotes(voice);
+
+  const formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
+
+  context.clear();
+  stave.draw();
+  voice.draw(context, stave);
+  beams.forEach(beam => beam.draw() );
+}
+
+drawNotes(notes);

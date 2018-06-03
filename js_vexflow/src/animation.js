@@ -11,14 +11,23 @@ stave.addClef("treble").addTimeSignature("4/4");
 stave.setContext(context).draw();
 
 const notes = [
-  new VF.StaveNote({clef: "treble", keys: ["c/4"], duration: "q" }),
-  new VF.StaveNote({clef: "treble", keys: ["d/4"], duration: "q" }),
-  new VF.StaveNote({clef: "treble", keys: ["b/4"], duration: "qr" }),
-  new VF.StaveNote({clef: "treble", keys: ["c/4", "e/4", "g/4"], duration: "q" })
+  new VF.StaveNote({clef: "treble", keys: ["c/4"], duration: "4" }),
+  new VF.StaveNote({clef: "treble", keys: ["b/4"], duration: "4r" }),
+  new VF.StaveNote({clef: "treble", keys: ["b/4"], duration: "2r" }),
 ];
 
 const voice = new VF.Voice({num_beats: 4,  beat_value: 4});
 voice.addTickables(notes);
 
 const formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
+
+const noteGroup = context.openGroup();
 voice.draw(context, stave);
+context.closeGroup();
+
+noteGroup.style.transform = 'translateX(500px)';
+
+setTimeout(() => {
+  noteGroup.style.transform = 'translateX(0)';
+  noteGroup.style.transition = 'transform 1s linear';
+}, 1000);
