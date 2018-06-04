@@ -1,36 +1,39 @@
 import { Flow as VF } from 'vexflow';
 
-const container = document.getElementById('container');
-const renderer = new VF.Renderer(container, VF.Renderer.Backends.SVG);
-renderer.resize(600, 200);
-const context = renderer.getContext();
+function init() {
+  const containerDom = document.getElementById('container');
+  const addNoteDom = document.getElementById('add_note');
+  const clearNotesDom = document.getElementById('clear_notes');
 
-const stave = new VF.Stave(10, 40, 500);
-stave.addClef("treble").addTimeSignature("4/4");
-stave.setContext(context)
-stave.draw();
+  const renderer = new VF.Renderer(containerDom, VF.Renderer.Backends.SVG);
+  renderer.resize(600, 200);
+  const context = renderer.getContext();
+  const notes = [];
 
-const notes = [];
+  const stave = new VF.Stave(10, 40, 500);
+  stave.addClef("treble").addTimeSignature("4/4");
+  stave.setContext(context)
 
-const fracValue = (frac) => 1.0 * frac.numerator / frac.denominator;
+  addNoteDom.addEventListener('click', addNote.bind(this, context, stave, notes));
+  clearNotesDom.addEventListener('click', clearNotes.bind(this, context, stave, notes));
 
-const sumTics = (notes) => notes.reduce((acc, note) => acc + fracValue(note.ticks), 0);
+  draw(context, stave, notes);
+}
 
-const addNotes = (voice, notes) => {
+function getNotes(voice, notes) {
   const addedNotes = [];
 
   for (const note of notes) {
-    if (fracValue(voice.ticksUsed) + sumTics([...addedNotes, note]) > fracValue(voice.totalTicks)) {
+    if (!canAddNotes(voice, [...addedNotes, note])) {
       break;
     }
     addedNotes.push(note);
   }
 
-  voice.addTickables(addedNotes);
   return addedNotes;
-};
+}
 
-const fillRestNotes = (voice) => {
+function getRestNotes(voice) {
   const restNoteDurations = [
     "1r",
     "2r",
@@ -45,35 +48,32 @@ const fillRestNotes = (voice) => {
   while (true) {
     const restNote = new VF.StaveNote({ clef: "treble", keys: ["b/4"], duration: restNoteDurations[0] });
 
-    if (fracValue(voice.ticksUsed) + sumTics([...restNotes, restNote]) > fracValue(voice.totalTicks)) {
+    if (!canAddNotes(voice, [...restNotes, restNote])) {
       restNoteDurations.shift();
       if (restNoteDurations.length === 0) break;
       continue;
     }
     restNotes.push(restNote);
   }
-  voice.addTickables(restNotes.reverse());
-};
 
-document.getElementById('add_note').addEventListener('click', _ => {
-  notes.push(new VF.StaveNote({ clef: "treble", keys: ["c/4"], duration: "16" }));
-  drawNotes(notes);
-});
+  return restNotes.reverse();
+}
 
-document.getElementById('clear_note').addEventListener('click', _ => {
-  notes.splice(0);
-  context.clear();
-  stave.draw();
-  drawNotes(notes);
-});
+function canAddNotes(voice, notes) {
+  return fracValue(voice.ticksUsed) + sumTics(notes) <= fracValue(voice.totalTicks);
+}
 
-const drawNotes = (notes) => {
-  const voice = new VF.Voice({num_beats: 4,  beat_value: 4});
+function draw(context, stave, notes) {
+  const voice = new VF.Voice({ num_beats: 4,  beat_value: 4 });
 
-  const addedNotes = addNotes(voice, notes);
+  const addedNotes = getNotes(voice, notes);
+  voice.addTickables(addedNotes);
+
   const beams = VF.Beam.generateBeams(addedNotes);
   beams.forEach(beam => beam.setContext(context));
-  fillRestNotes(voice);
+
+  const restNotes = getRestNotes(voice);
+  voice.addTickables(restNotes);
 
   const formatter = new VF.Formatter().joinVoices([voice]).format([voice], 400);
 
@@ -83,4 +83,24 @@ const drawNotes = (notes) => {
   beams.forEach(beam => beam.draw() );
 }
 
-drawNotes(notes);
+function addNote(context, stave, notes) {
+  notes.push(new VF.StaveNote({ clef: "treble", keys: ["c/4"], duration: "16" }));
+  draw(context, stave, notes);
+}
+
+function clearNotes(context, stave, notes) {
+  notes.splice(0);
+  context.clear();
+  stave.draw();
+  draw(context, stave, notes);
+}
+
+function fracValue(frac) {
+  return 1.0 * frac.numerator / frac.denominator;
+}
+
+function sumTics(notes) {
+  return notes.reduce((acc, note) => acc + fracValue(note.ticks), 0);
+}
+
+init();
