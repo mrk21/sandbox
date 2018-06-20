@@ -10,27 +10,15 @@ namespace InputKey
 {
     public class CubeBehaviourScript : MonoBehaviour
     {
-        void Awake()
+        private void Start()
         {
             // @see [【UniRx】Update()タイミングのイベントをFixedUpdate()のタイミングに変換する - Qiita](https://qiita.com/toRisouP/items/aeddfec470ca6de5924a)
-            var rididBody = GetComponent<Rigidbody> ();
+            var rididBody = GetComponent<Rigidbody>();
 
             this.UpdateAsObservable()
-                .Where(_ => Input.GetKey(KeyCode.A))
+                .Where(_ => Input.GetKey(KeyCode.Space))
                 .BatchFrame(0, FrameCountType.FixedUpdate)
                 .Subscribe(_ => rididBody.AddForce(Vector3.up, ForceMode.VelocityChange));
-        }
-
-        // Use this for initialization
-        void Start()
-        {
-            
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
         }
     }
 }

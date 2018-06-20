@@ -16,8 +16,8 @@ namespace InputKey
             this.UpdateAsObservable()
                 .Subscribe(key => text.text = "");
             this.UpdateAsObservable()
-                .Where(_ => Input.GetKey(KeyCode.A))
-                .Subscribe(key => text.text = "'A' key is pressing!");
+                .Where(_ => Input.GetKey(KeyCode.Space))
+                .Subscribe(key => text.text = "'Space' key is pressing!");
         }
 
         // Use this for initialization
