@@ -1,0 +1,5 @@
+{
+  "name": "aws_ecs_rails",
+  "private": true,
+  "dependencies": {}
+}

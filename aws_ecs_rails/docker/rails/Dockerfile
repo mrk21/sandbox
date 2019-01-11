@@ -1,0 +1,42 @@
+# ECS test application container
+# @see Quickstart: Compose and Rails | Docker Documentation https://docs.docker.com/compose/rails/
+# @see Ruby offical image https://hub.docker.com/_/ruby/
+# @see Docker で apt-get install するときに TERM 系のエラーが出る | まくまく Docker ノート http://maku77.github.io/docker/term-error.html
+FROM ruby:2.6.0
+ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND noninteractive
+
+# Install basic packages
+RUN apt-get update -qq && \
+    apt-get install -y build-essential tree vim less curl dnsutils net-tools procps && \
+    apt-get install -y --no-install-recommends apt-utils
+
+# Install MySQL 8.0 client with native library
+# @see [MySQL :: A Quick Guide to Using the MySQL APT Repository](https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/)
+# @see [MySQL 8.0をUbuntu Server 16.04へインストール - Symfoware](https://symfoware.blog.fc2.com/blog-entry-2139.html)
+RUN apt-get install -y lsb-release && \
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.10-1_all.deb && \
+    dpkg -i mysql-apt-config_0.8.10-1_all.deb && \
+    apt-get update -qq && \
+    apt-get install -y mysql-client
+
+# Install Node.js
+# @see node https://askubuntu.com/questions/786272/why-does-installing-node-6-x-on-ubuntu-16-04-actually-install-node-4-2-6
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+    apt-get update -qq && \
+    apt-get install -y nodejs
+
+# Install bundler
+RUN gem install bundler
+
+
+ENV APP_HOME /app
+
+# NOTE: A login shell overrides the PATH environment variable set by docker,
+# so I set same value as the environment variable to .profile.
+# By means of this, PATH environment variable is same value on non login shell and login shell.
+ENV PATH $APP_HOME/bin:$PATH
+RUN echo "export PATH=$PATH" >> /root/.profile
+
+RUN mkdir -p $APP_HOME
+WORKDIR $APP_HOME

@@ -1,0 +1,10 @@
+#-------------------------------------------------------------------------------
+# Docker Settings
+# If you used Docker, then you must set the following environment variables!
+#-------------------------------------------------------------------------------
+export DOCKER_HOST_APP_PORT=3000 # You can access to Rails by http://127.0.0.1:${DOCKER_HOST_APP_PORT} on the host.
+export DOCKER_HOST_DB_PORT=3306  # You can access to MySQL by tcp://root:@127.0.0.1:${DOCKER_HOST_DB_PORT} on the host.
+export DOCKER_HOST_NGINX_PORT=80 # You can access to Rails by http://127.0.0.1:${DOCKER_HOST_NGINX_PORT} on the host.
+
+export DOCKER_REPO_APP=
+export DOCKER_REPO_NGINX=

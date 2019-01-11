@@ -1,0 +1,24 @@
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  pool: 10
+  timeout: 10000
+  host: <%= ENV.fetch('DATABASE_HOST', 'localhost') %>
+  username: <%= ENV.fetch('DATABASE_USER', 'root') %>
+  password: <%= ENV.fetch('DATABASE_PASSWORD', nil) %>
+
+development:
+  <<: *default
+  database: aws_ecs_rails_development
+
+test:
+  <<: *default
+  database: aws_ecs_rails_test
+
+staging:
+  <<: *default
+  database: aws_ecs_rails_staging
+
+production:
+  <<: *default
+  database: aws_ecs_rails_production
