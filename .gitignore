@@ -1,0 +1,6 @@
+.terraform
+node_modules
+.next
+.nuxt
+.envrc.local
+.vscode
