@@ -1,4 +1,4 @@
-# Nextjs with TypeScript and Redux
+# Nextjs with TypeScript and Redux ORM
 
 ## Setup
 
