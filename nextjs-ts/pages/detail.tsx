@@ -16,7 +16,7 @@ export const Detail = ({ id }: DetailProps) => {
   );
 };
 
-Detail.getInitialProps = (context: NextDocumentContext): DetailInitialProps => {
+Detail.getInitialProps = async (context: NextDocumentContext): Promise<DetailInitialProps> => {
   const { id } = context.query;
   if (typeof id !== 'string') throw new TypeError(`invalid value: ${JSON.stringify(id)}`);
   return { id };
