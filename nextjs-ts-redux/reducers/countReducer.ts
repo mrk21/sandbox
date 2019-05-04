@@ -1,11 +1,11 @@
-import { Reducer, Action } from 'redux';
-import { CountAction } from '../actions/countActions';
+import { Reducer } from 'redux';
+import { CountActionTypes, CountAction } from '../actions/countActions';
 
 export type CountState = {
   count: number;
 };
 
-export type CountReducer = Reducer<CountState, Action<CountAction>>;
+export type CountReducer = Reducer<CountState, CountAction>;
 
 export const initialCountState: CountState = {
   count: 0,
@@ -13,15 +13,15 @@ export const initialCountState: CountState = {
 
 export const countReducer: CountReducer = (state = initialCountState, action) => {
   switch (action.type) {
-    case CountAction.INCREMENT:
+    case CountActionTypes.INCREMENT:
       return {
         ...state,
-        count: state.count + 1,
+        count: state.count + action.payload.value,
       };
-    case CountAction.DECREMENT:
+    case CountActionTypes.DECREMENT:
       return {
         ...state,
-        count: state.count - 1,
+        count: state.count - action.payload.value,
       };
     default:
       return state;

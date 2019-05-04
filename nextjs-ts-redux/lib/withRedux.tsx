@@ -1,69 +1,59 @@
 import React from 'react'
 import { createStore, RootState, initialRootState, AppStore } from '../store'
 import { NextContext } from 'next';
-import { NextDocumentContext } from 'next/document';
 import { DefaultQuery } from 'next/router';
 import { AppComponentType, NextAppContext, DefaultAppIProps } from 'next/app';
 
-const isServer = typeof window === 'undefined'
+export type ReduxContext = {
+  store: AppStore;
+};
+
+export type NextContextWithRedux<Q extends DefaultQuery = DefaultQuery> =
+  NextContext<Q> & ReduxContext;
+
+export type NextAppContextWithRedux<Q extends DefaultQuery = DefaultQuery> =
+  NextAppContext<Q> & {
+    ctx: NextContextWithRedux<Q>;
+  };
 
 export type AppWithReduxProps = DefaultAppIProps & {
   initialState: RootState;
 };
 
-export type AppProps = {
-  store: AppStore;
-  isServer: boolean;
-};
+export type GetInitialProps<P extends {} = {}, Q extends DefaultQuery = DefaultQuery> =
+  (context: NextContextWithRedux<Q>) => Promise<P>;
 
-export type NextReduxContext = {
-  store: AppStore;
-  isServer: boolean;
-};
+export type GetAppWithReduxInitialProps<Q extends DefaultQuery = DefaultQuery> =
+  (context: NextAppContextWithRedux<Q>) => Promise<AppWithReduxProps>;
 
-export type NextReduxAppContext<Q extends DefaultQuery = DefaultQuery> = {
-  ctx: NextContext<Q> & NextReduxContext;
-};
-
-export type GetInitialProps<P extends {} = {}, Q extends DefaultQuery = DefaultQuery>
-  = (context: NextDocumentContext<Q> & NextReduxContext) => Promise<P>;
-
-export type GetAppWithReduxInitialProps<Q extends DefaultQuery = DefaultQuery>
-  = (context: NextAppContext<Q> & NextReduxAppContext) => Promise<AppWithReduxProps>;
+let store: AppStore | null = null;
 
 function getOrCreateStore(initialState: RootState = initialRootState): AppStore {
-  // Always make a new store if server, otherwise state is shared between requests
-  if (isServer) {
-    return createStore(initialState)
-  }
-  const window_: Window & { __NEXT_REDUX_STORE__?: AppStore } = window;
+  const isServer = typeof window === 'undefined';
 
-  // Create store if unavailable on the client and set it on the window object
-  if (typeof window_.__NEXT_REDUX_STORE__ === 'undefined') {
-    window_.__NEXT_REDUX_STORE__ = createStore(initialState);
+  if (isServer) {
+    return createStore(initialState);
   }
-  return window_.__NEXT_REDUX_STORE__;
+  if (store === null) {
+    store = createStore(initialState);
+  }
+  return store;
 }
 
 export const withRedux = (App: AppComponentType<any>) => {
   const AppWithRedux = (props: AppWithReduxProps) => {
     const store = getOrCreateStore(props.initialState);
-    return <App {...props} store={ store } isServer={ isServer } />
+    return (<App {...props} store={ store } />);
   };
 
   const getInitialProps: GetAppWithReduxInitialProps = async (context) => {
-    // Get or Create the store with `undefined` as initialState
-    // This allows you to set a custom default initialState
     const store = getOrCreateStore();
-
-    // Provide the store to getInitialProps of pages
     context.ctx.store = store;
-    context.ctx.isServer = isServer;
 
     let appProps: DefaultAppIProps | null = null;
-    if (typeof App.getInitialProps !== 'function') throw new Error('invalid component!');
+    if (typeof App.getInitialProps !== 'function') throw new Error('invalid app component!');
     appProps = await App.getInitialProps(context);
-    if (appProps === null) throw new Error('invalid props!');
+    if (appProps === null) throw new Error('invalid app props!');
 
     return {
       ...appProps,

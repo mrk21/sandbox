@@ -1,9 +1,9 @@
 import App, { Container } from 'next/app';
 import React from 'react';
-import withRedux, { AppProps } from '../lib/withRedux';
+import withRedux, { ReduxContext } from '../lib/withRedux';
 import { Provider } from 'react-redux';
 
-class MyApp extends App<AppProps> {
+class MyApp extends App<ReduxContext> {
   render() {
     const { Component, pageProps, store } = this.props;
     return (
