@@ -48,10 +48,10 @@ export const TodoDetail: StatelessComponent<TodoDetailProps> = ({ id, record, er
   }
 };
 
-const mapStateToProps: MapStateToProps<TodoDetailPropsFromState, TodoDetailPropsFromParent, RootState> = (state, ownProps) => ({
-  record: todoReducer.record(state, ownProps.id),
-  error: todoReducer.error(state, ownProps.id),
-  isLoading: todoReducer.isLoading(state, ownProps.id),
+const mapStateToProps: MapStateToProps<TodoDetailPropsFromState, TodoDetailPropsFromParent, RootState> = (state, { id }) => ({
+  record: todoReducer.record(state, id),
+  error: todoReducer.error(state, id),
+  isLoading: todoReducer.isLoading(state, id),
 });
 
 const mapDispatchToProps: MapDispatchToPropsFunction<TodoDetailPropsFromAction, TodoDetailPropsFromParent> = () => ({});

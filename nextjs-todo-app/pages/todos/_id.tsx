@@ -7,7 +7,9 @@ import InvalidValueError from '~/lib/InvalidValueError';
 import DefaultLayout from '~/components/layouts/DefaultLayout';
 import TodoDetail from '~/components/TodoDetail';
 
-type TodoDetailPagePropsFromNext = {};
+type TodoDetailPagePropsFromNext = {
+  id: string
+};
 type TodoDetailPagePropsFromState = {};
 type TodoDetailPagePropsFromAction = {
   getTodo: (input: { id: string }) => Promise<void>;
@@ -18,6 +20,15 @@ type TodoDetailPageProps =
   TodoDetailPagePropsFromAction;
 type Component = StatelessPageComponent<
   TodoDetailPageProps,
+  TodoDetailPagePropsFromNext
+>;
+type ComponentMapStateToProps = MapStateToProps<
+  TodoDetailPagePropsFromState,
+  TodoDetailPagePropsFromNext,
+  RootState
+>;
+type ComponentMapDispatchToProps = MapDispatchToPropsFunction<
+  TodoDetailPagePropsFromAction,
   TodoDetailPagePropsFromNext
 >;
 
@@ -43,8 +54,8 @@ TodoDetailPage.getInitialProps = async (context) => {
   return { id };
 };
 
-const mapStateToProps: MapStateToProps<TodoDetailPagePropsFromState, TodoDetailPagePropsFromNext, RootState> = () => ({});
-const mapDispatchToProps: MapDispatchToPropsFunction<TodoDetailPagePropsFromAction, TodoDetailPagePropsFromNext> = (dispatch) => ({
+const mapStateToProps: ComponentMapStateToProps = () => ({});
+const mapDispatchToProps: ComponentMapDispatchToProps = (dispatch) => ({
   getTodo: (input) => getTodo(dispatch, input),
 });
 
