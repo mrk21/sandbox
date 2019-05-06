@@ -13,10 +13,10 @@ type GetRawResponse = undefined | null | {
   };
 };
 export async function get({ id }: GetInput): Promise<APIResponse<Todo>> {
-  return new Promise((resolve, reject) => {
+  const response = await new Promise<GetRawResponse>((resolve) => {
     setTimeout(() => {
       if (id === '-1') {
-        reject({
+        resolve({
           todo: {
             error: {
               messages: [
@@ -38,23 +38,11 @@ export async function get({ id }: GetInput): Promise<APIResponse<Todo>> {
         });
       }
     }, 1000);
-  })
-  .then((response: GetRawResponse) => {
-    const data = ((response || {}).todo || {}).data;
-    const error = null;
-    return todoAPIResponse.fromObject({ data, error });
-  })
-  .catch((e: Error | GetRawResponse) => {
-    if (e instanceof Error) {
-      console.error(e);
-      return todoAPIResponse.fromObject({ data: null, error: null });
-    }
-    else {
-      const data = null;
-      const error = ((e || {}).todo || {}).error;
-      return todoAPIResponse.fromObject({ data, error });
-    }
   });
+  const todo = (response || {}).todo || {};
+  const data = todo.data || null;
+  const error = todo.error || null;
+  return todoAPIResponse.fromObject({ data, error });
 }
 
 export default { get };

@@ -26,6 +26,11 @@ export const Home = () => {
             <a>detail(error)</a>
           </Link>
         </li>
+        <li>
+          <Link as="/detail/0" href="/detail?id=0">
+            <a>detail(new)</a>
+          </Link>
+        </li>
       </ul>
       <style jsx>{ styles }</style>
     </div>

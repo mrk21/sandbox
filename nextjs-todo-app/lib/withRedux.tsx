@@ -3,8 +3,7 @@ import { createStore, RootState, initialRootState, AppStore } from '../store'
 import { NextContext } from 'next';
 import { DefaultQuery } from 'next/router';
 import { AppComponentType, NextAppContext, DefaultAppIProps } from 'next/app';
-
-export const isServer = typeof window === 'undefined';
+import isServer from '~/lib/isServer';
 
 export type ReduxContext = {
   store: AppStore;

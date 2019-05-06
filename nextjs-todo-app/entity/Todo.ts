@@ -1,9 +1,9 @@
 import InvalidValueError from '~/lib/InvalidValueError';
 import { PropertyHolder, isNullableType, isNotNullType, isOptionalType, isNull } from '~/lib/typeHelpers';
-import { uniqueId } from 'lodash';
+import uniqueId from '~/lib/uniqueId';
 
 export type Todo = {
-  _newRecord: boolean;
+  readonly _newRecord: boolean;
   id: string;
   title: string;
   description: string;
@@ -20,9 +20,17 @@ export function fromObject(value: unknown): Todo {
   if (!isNotNullType (object.description, 'string' )) throw new InvalidValueError('object.description', object.description);
 
   return {
-    _newRecord: !isNull(object.id),
-    id: object.id || uniqueId('new_record/'),
+    _newRecord: isNull(object.id),
+    id: object.id || uniqueId(['new_record']),
     title: object.title,
     description: object.description,
   };
+}
+
+export function makeEntity(values: Partial<Todo>): Todo {
+  return fromObject({
+    id: values.id || null,
+    title: values.title || '',
+    description: values.description || '',
+  });
 }

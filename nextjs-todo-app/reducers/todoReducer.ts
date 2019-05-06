@@ -30,8 +30,9 @@ export const todoReducer: TodoReducer = (state = initialTodoState, action) => {
     }
     case TodoActionTypes.APPEND: {
       const newState = cloneDeep(state);
-      const record = action.payload;
+      const record = cloneDeep(action.payload);
       const isExisted = record.id in newState.recordIndex;
+
       newState.recordIndex[record.id] = record;
       if (!isExisted) newState.records.push(record);
       newState.loadings[record.id] = false;
@@ -40,7 +41,9 @@ export const todoReducer: TodoReducer = (state = initialTodoState, action) => {
     }
     case TodoActionTypes.ERROR: {
       const newState = cloneDeep(state);
-      newState.errors[action.payload.id] = action.payload.error;
+      const error = cloneDeep(action.payload.error);
+
+      newState.errors[action.payload.id] = error;
       delete newState.loadings[action.payload.id];
       return newState;
     }

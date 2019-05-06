@@ -1,6 +1,6 @@
 import InvalidValueError from '~/lib/InvalidValueError';
 import { Action, Dispatch } from 'redux';
-import { Todo } from '~/entity/Todo';
+import { Todo, makeEntity } from '~/entity/Todo';
 import { APIError } from '~/entity/APIError';
 import todoAPI from '~/api/todo';
 
@@ -55,4 +55,13 @@ export async function getTodo(dispatch: Dispatch<TodoAction>, { id }: GetTodoInp
   else {
     throw new InvalidValueError('get todo response', { data, error });
   }
+}
+
+export async function makeTodo(dispatch: Dispatch<TodoAction>, input: Partial<Todo>) {
+  const newRecord = makeEntity(input);
+  dispatch({
+    type: TodoActionTypes.APPEND,
+    payload: newRecord,
+  });
+  return newRecord.id;
 }
