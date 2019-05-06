@@ -1,5 +1,5 @@
 import InvalidValueError from '~/lib/InvalidValueError';
-import { PropertyHolder, isNullableType, isNotNullType, isOptionalType, isNull } from '~/lib/typeHelpers';
+import { PropertyHolder, isNullableType, isNotNullType, isOptionalType, isNull, isUndefined } from '~/lib/typeHelpers';
 import uniqueId from '~/lib/uniqueId';
 
 export type Todo = {
@@ -20,7 +20,7 @@ export function fromObject(value: unknown): Todo {
   if (!isNotNullType (object.description, 'string' )) throw new InvalidValueError('object.description', object.description);
 
   return {
-    _newRecord: isNull(object.id),
+    _newRecord: isUndefined(object._newRecord) ? isNull(object.id) : object._newRecord,
     id: object.id || uniqueId(['new_record']),
     title: object.title,
     description: object.description,

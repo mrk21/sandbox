@@ -27,6 +27,10 @@ export type GetInitialProps<P extends {} = {}, Q extends DefaultQuery = DefaultQ
 export type GetAppWithReduxInitialProps<Q extends DefaultQuery = DefaultQuery> =
   (context: NextAppContextWithRedux<Q>) => Promise<AppWithReduxProps>;
 
+export type StatelessPageComponent<Props = {}, NextProps = {}> = React.StatelessComponent<Props> & {
+  getInitialProps?: GetInitialProps<NextProps>;
+}
+
 let store: AppStore | null = null;
 
 function getOrCreateStore(initialState: RootState = initialRootState): AppStore {

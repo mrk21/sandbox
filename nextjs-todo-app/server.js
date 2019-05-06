@@ -8,8 +8,8 @@ const handler = app.getRequestHandler();
 app.prepare().then(() => {
   const server = express();
 
-  server.get('/detail/:id', (req, res) => {
-    const page = '/detail';
+  server.get('/todos/:id', (req, res) => {
+    const page = '/todos/_id';
     const params = { id: req.params.id };
     app.render(req, res, page, params);
   });

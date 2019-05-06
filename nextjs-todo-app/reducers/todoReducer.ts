@@ -10,6 +10,7 @@ export type TodoState = {
   recordIndex: { [key: string]: Todo | undefined };
   errors: { [key: string]: APIError | undefined };
   loadings: { [key: string]: boolean | undefined };
+  loadingAll: boolean;
 };
 
 export type TodoReducer = Reducer<TodoState, TodoAction>;
@@ -19,10 +20,21 @@ export const initialTodoState: TodoState = {
   recordIndex: {},
   errors: {},
   loadings: {},
+  loadingAll: false,
 };
 
 export const todoReducer: TodoReducer = (state = initialTodoState, action) => {
   switch (action.type) {
+    case TodoActionTypes.GET_LIST: {
+      const newState = cloneDeep(state);
+      newState.loadingAll = true;
+      return newState;
+    }
+    case TodoActionTypes.SET_LIST: {
+      const newState = cloneDeep(initialTodoState);
+      newState.records = action.payload;
+      return newState;
+    }
     case TodoActionTypes.GET: {
       const newState = cloneDeep(state);
       newState.loadings[action.payload.id] = true;
@@ -53,8 +65,10 @@ export const todoReducer: TodoReducer = (state = initialTodoState, action) => {
   }
 }
 
-export const record = (state: RootState, id: string) => state.todo.recordIndex[id];
-export const error = (state: RootState, id: string) => state.todo.errors[id];
+export const records = (state: RootState) => cloneDeep(state.todo.records);
+export const record = (state: RootState, id: string) => cloneDeep(state.todo.recordIndex[id]);
+export const error = (state: RootState, id: string) => cloneDeep(state.todo.errors[id]);
 export const isLoading = (state: RootState, id: string) => !!state.todo.loadings[id];
+export const isLoadingAll = (state: RootState) => state.todo.loadingAll;
 
 export default todoReducer;
