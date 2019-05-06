@@ -1,0 +1,57 @@
+import { Reducer } from 'redux';
+import { Todo } from '~/entity/Todo';
+import { APIError } from '~/entity/APIError';
+import { TodoActionTypes, TodoAction } from '../actions/todoActions';
+import { cloneDeep } from 'lodash';
+import { RootState } from '~/store';
+
+export type TodoState = {
+  records: Todo[];
+  recordIndex: { [key: string]: Todo | undefined };
+  errors: { [key: string]: APIError | undefined };
+  loadings: { [key: string]: boolean | undefined };
+};
+
+export type TodoReducer = Reducer<TodoState, TodoAction>;
+
+export const initialTodoState: TodoState = {
+  records: [],
+  recordIndex: {},
+  errors: {},
+  loadings: {},
+};
+
+export const todoReducer: TodoReducer = (state = initialTodoState, action) => {
+  switch (action.type) {
+    case TodoActionTypes.GET: {
+      const newState = cloneDeep(state);
+      newState.loadings[action.payload.id] = true;
+      return newState;
+    }
+    case TodoActionTypes.APPEND: {
+      const newState = cloneDeep(state);
+      const record = action.payload;
+      const isExisted = record.id in newState.recordIndex;
+      newState.recordIndex[record.id] = record;
+      if (!isExisted) newState.records.push(record);
+      newState.loadings[record.id] = false;
+      delete newState.errors[record.id];
+      return newState;
+    }
+    case TodoActionTypes.ERROR: {
+      const newState = cloneDeep(state);
+      newState.errors[action.payload.id] = action.payload.error;
+      delete newState.loadings[action.payload.id];
+      return newState;
+    }
+    default: {
+      return state;
+    }
+  }
+}
+
+export const record = (state: RootState, id: string) => state.todo.recordIndex[id];
+export const error = (state: RootState, id: string) => state.todo.errors[id];
+export const isLoading = (state: RootState, id: string) => !!state.todo.loadings[id];
+
+export default todoReducer;
