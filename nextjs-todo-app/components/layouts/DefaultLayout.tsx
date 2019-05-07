@@ -1,8 +1,11 @@
-import { StatelessComponent } from 'react';
+import * as types from '~/lib/ComponentTypes';
 import css from 'styled-jsx/css';
 import Link from 'next/link';
 
-export const DefaultLayout: StatelessComponent = ({ children }) => {
+type PropsTypes = types.PropsTypes;
+type CTypes = types.ComponentTypes<PropsTypes>;
+
+export const DefaultLayout: CTypes['StatelessComponent'] = ({ children }) => {
   return (
     <article className="page">
       <header className="page__header">

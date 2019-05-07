@@ -1,26 +1,23 @@
-import { StatelessComponent } from 'react';
-import { connect, MapStateToProps, MapDispatchToPropsFunction } from 'react-redux';
-import { RootState } from '~/store';
+import { connect } from 'react-redux';
 import { Todo } from '~/entity/Todo';
 import { APIError } from '~/entity/APIError';
-import * as todoReducer from '~/reducers/todoReducer';
+import * as todo from '~/reducers/todoReducer';
+import * as types from '~/lib/ComponentTypes';
 import InvalidValueError from '~/lib/InvalidValueError';
 
-type TodoDetailPropsFromParent = {
-  id: string;
-}
-
-type TodoDetailPropsFromState = {
-  record: Todo | undefined;
-  error: APIError | undefined;
-  isLoading: boolean;
+type PropsTypes = types.PropsTypes & {
+  Owned: {
+    id: string;
+  };
+  State: {
+    record: Todo | undefined;
+    error: APIError | undefined;
+    isLoading: boolean;
+  };
 };
+type CTypes = types.ComponentTypes<PropsTypes>;
 
-type TodoDetailPropsFromAction = {};
-
-type TodoDetailProps = TodoDetailPropsFromParent & TodoDetailPropsFromState & TodoDetailPropsFromAction;
-
-export const TodoDetail: StatelessComponent<TodoDetailProps> = ({ id, record, error, isLoading }) => {
+export const TodoDetail: CTypes['StatelessComponent'] = ({ id, record, error, isLoading }) => {
   if (isLoading) {
     return (<div>loading...</div>);
   }
@@ -48,12 +45,12 @@ export const TodoDetail: StatelessComponent<TodoDetailProps> = ({ id, record, er
   }
 };
 
-const mapStateToProps: MapStateToProps<TodoDetailPropsFromState, TodoDetailPropsFromParent, RootState> = (state, { id }) => ({
-  record: todoReducer.record(state, id),
-  error: todoReducer.error(state, id),
-  isLoading: todoReducer.isLoading(state, id),
+const mapStateToProps: CTypes['MapStateToPropsFunc'] = (state, { id }) => ({
+  record: todo.record(state, id),
+  error: todo.error(state, id),
+  isLoading: todo.isLoading(state, id),
 });
 
-const mapDispatchToProps: MapDispatchToPropsFunction<TodoDetailPropsFromAction, TodoDetailPropsFromParent> = () => ({});
+const mapDispatchToProps: CTypes['MapDispatchToPropsFunc'] = () => ({});
 
 export default connect(mapStateToProps, mapDispatchToProps)(TodoDetail);

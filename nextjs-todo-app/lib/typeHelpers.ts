@@ -59,3 +59,7 @@ export function isUndefined(value: unknown): value is undefined {
 export function isNull(value: unknown): value is null {
   return value === null;
 }
+
+export function isNotNull<T>(value: T | null): value is T {
+  return value !== null;
+}

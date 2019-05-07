@@ -1,36 +1,35 @@
 import InvalidValueError from '~/lib/InvalidValueError';
-import { PropertyHolder, isNullableType, isNotNullType, isOptionalType, isNull, isUndefined } from '~/lib/typeHelpers';
-import uniqueId from '~/lib/uniqueId';
+import { PropertyHolder, isNotNullType, isNullableType } from '~/lib/typeHelpers';
+import * as apiResponseBase from '~/entity/APIResourceBase';
+import * as objectEntity from '~/entity/ObjectEntity';
 
-export type Todo = {
-  readonly _newRecord: boolean;
-  id: string;
+export type Todo = apiResponseBase.APIResourceBase & {
   title: string;
   description: string;
+  assignerId: string | null;
 };
 
 export function fromObject(value: unknown): Todo {
-  if (!isNotNullType(value, 'object')) throw new InvalidValueError('object', value);
+  const baseEntity = apiResponseBase.fromObject(value);
+  const object: PropertyHolder<Todo> = objectEntity.fromObject(value);
 
-  const object: PropertyHolder<Todo> = value;
-
-  if (!isOptionalType(object._newRecord , 'boolean')) throw new InvalidValueError('object._newRecord' , object._newRecord );
-  if (!isNullableType(object.id         , 'string' )) throw new InvalidValueError('object.id'         , object.id         );
-  if (!isNotNullType (object.title      , 'string' )) throw new InvalidValueError('object.title'      , object.title      );
-  if (!isNotNullType (object.description, 'string' )) throw new InvalidValueError('object.description', object.description);
+  if (!isNotNullType (object.title      , 'string')) throw new InvalidValueError('object.title'      , object.title      );
+  if (!isNotNullType (object.description, 'string')) throw new InvalidValueError('object.description', object.description);
+  if (!isNullableType(object.assignerId , 'string')) throw new InvalidValueError('object.assignerId' , object.assignerId );
 
   return {
-    _newRecord: isUndefined(object._newRecord) ? isNull(object.id) : object._newRecord,
-    id: object.id || uniqueId(['new_record']),
+    ...baseEntity,
     title: object.title,
     description: object.description,
+    assignerId: object.assignerId,
   };
 }
 
 export function makeEntity(values: Partial<Todo>): Todo {
   return fromObject({
-    id: values.id || null,
+    ...apiResponseBase.fromObject(values),
     title: values.title || '',
     description: values.description || '',
+    assignerId: values.assignerId || null,
   });
 }

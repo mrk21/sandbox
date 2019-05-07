@@ -1,32 +1,18 @@
-import { connect, MapStateToProps, MapDispatchToPropsFunction } from 'react-redux';
-import { RootState } from '~/store';
-import { StatelessPageComponent } from '~/lib/withRedux';
-import DefaultLayout from '~/components/layouts/DefaultLayout';
-import { getTodoList } from '~/actions/todoActions';
-import TodoList from '~/components/TodoList';
+import { connect } from 'react-redux';
 import isServer from '~/lib/isServer';
+import * as types from '~/lib/ComponentTypes';
+import { getTodoList } from '~/actions/todoActions';
+import DefaultLayout from '~/components/layouts/DefaultLayout';
+import TodoList from '~/components/TodoList';
 
-type IndexPagePropsFromNext = {};
-type IndexPagePropsFromState = {};
-type IndexPagePropsFromAction = {
-  getTodoList: () => Promise<void>;
+type PropsTypes = types.PropsTypes & {
+  Dispatch: {
+    getTodoList: () => Promise<void>;
+  };
 };
-type IndexPageProps =
-  IndexPagePropsFromNext &
-  IndexPagePropsFromState &
-  IndexPagePropsFromAction;
-type Component = StatelessPageComponent<IndexPageProps, IndexPagePropsFromNext>;
-type ComponentMapStateToProps = MapStateToProps<
-  IndexPagePropsFromState,
-  IndexPagePropsFromNext,
-  RootState
->;
-type ComponentMapDispatchToProps = MapDispatchToPropsFunction<
-  IndexPagePropsFromAction,
-  IndexPagePropsFromNext
->;
+type CTypes = types.ComponentTypes<PropsTypes>;
 
-export const IndexPage: Component = () => (
+export const IndexPage: CTypes['StatelessPageComponent'] = () => (
   <DefaultLayout>
     <h2>Home</h2>
     <TodoList detailLinkProps={ (id) => ({
@@ -35,19 +21,19 @@ export const IndexPage: Component = () => (
     }) }></TodoList>
   </DefaultLayout>
 );
-IndexPage.getInitialProps = async (context) => {
-  const actions = mapDispatchToProps(context.store.dispatch, {});
 
+IndexPage.getInitialProps = async (context) => {
   if (isServer) {
-    await actions.getTodoList();
+    await getTodoList(context.store.dispatch);
   }
   else {
-    actions.getTodoList();
+    getTodoList(context.store.dispatch);
   }
   return {};
 };
-const mapStateToProps: ComponentMapStateToProps = () => ({});
-const mapDispatchToProps: ComponentMapDispatchToProps = (dispatch) => ({
+
+const mapStateToProps: CTypes['MapStateToPropsFunc'] = () => ({});
+const mapDispatchToProps: CTypes['MapDispatchToPropsFunc'] = (dispatch) => ({
   getTodoList: () => getTodoList(dispatch),
 });
 

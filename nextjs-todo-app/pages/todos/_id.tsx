@@ -1,38 +1,27 @@
-import { connect, MapStateToProps, MapDispatchToPropsFunction } from 'react-redux';
-import { RootState } from '~/store';
-import { StatelessPageComponent } from '~/lib/withRedux';
-import { getTodo } from '~/actions/todoActions';
+import { connect } from 'react-redux';
+import * as types from '~/lib/ComponentTypes';
 import isServer from '~/lib/isServer';
-import InvalidValueError from '~/lib/InvalidValueError';
+import { getTodo } from '~/actions/todoActions';
 import DefaultLayout from '~/components/layouts/DefaultLayout';
 import TodoDetail from '~/components/TodoDetail';
 
-type TodoDetailPagePropsFromNext = {
-  id: string
+type PropsTypes = types.PropsTypes & {
+  Owned: {
+    id: string;
+  }
+  Page: {
+    id: string;
+  };
+  Dispatch: {
+    getTodo: (input: { id: string }) => Promise<void>;
+  };
 };
-type TodoDetailPagePropsFromState = {};
-type TodoDetailPagePropsFromAction = {
-  getTodo: (input: { id: string }) => Promise<void>;
-};
-type TodoDetailPageProps =
-  TodoDetailPagePropsFromNext &
-  TodoDetailPagePropsFromState &
-  TodoDetailPagePropsFromAction;
-type Component = StatelessPageComponent<
-  TodoDetailPageProps,
-  TodoDetailPagePropsFromNext
->;
-type ComponentMapStateToProps = MapStateToProps<
-  TodoDetailPagePropsFromState,
-  TodoDetailPagePropsFromNext,
-  RootState
->;
-type ComponentMapDispatchToProps = MapDispatchToPropsFunction<
-  TodoDetailPagePropsFromAction,
-  TodoDetailPagePropsFromNext
->;
+type Query = {
+  id: string;
+}
+type CTypes = types.ComponentTypes<PropsTypes, Query>;
 
-export const TodoDetailPage: Component = ({ id }) => {
+export const TodoDetailPage: CTypes['StatelessPageComponent'] = ({ id }) => {
   return (
     <DefaultLayout>
       <h2>Todo#{ id }</h2>
@@ -42,7 +31,6 @@ export const TodoDetailPage: Component = ({ id }) => {
 };
 TodoDetailPage.getInitialProps = async (context) => {
   const { id } = context.query;
-  if (typeof id !== 'string') throw new InvalidValueError('TodoDetailPage id', id);
   const actions = mapDispatchToProps(context.store.dispatch, { id });
 
   if (isServer) {
@@ -54,8 +42,8 @@ TodoDetailPage.getInitialProps = async (context) => {
   return { id };
 };
 
-const mapStateToProps: ComponentMapStateToProps = () => ({});
-const mapDispatchToProps: ComponentMapDispatchToProps = (dispatch) => ({
+const mapStateToProps: CTypes['MapStateToPropsFunc'] = () => ({});
+const mapDispatchToProps: CTypes['MapDispatchToPropsFunc'] = (dispatch) => ({
   getTodo: (input) => getTodo(dispatch, input),
 });
 

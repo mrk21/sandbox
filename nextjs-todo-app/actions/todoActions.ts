@@ -2,7 +2,9 @@ import InvalidValueError from '~/lib/InvalidValueError';
 import { Action, Dispatch } from 'redux';
 import { Todo, makeEntity } from '~/entity/Todo';
 import { APIError } from '~/entity/APIError';
-import todoAPI from '~/api/todo';
+import * as todoAPI from '~/api/todo';
+import { getUser, UserAction } from '~/actions/userActions';
+import { compact, uniq } from 'lodash';
 
 export enum TodoActionTypes {
   GET_LIST = 'Todo/GET_LIST',
@@ -36,7 +38,7 @@ export type TodoAction = GetTodoListAction | SetTodoAction | GetTodoAction | App
 /**
  * get list
  */
-export async function getTodoList(dispatch: Dispatch<TodoAction>) {
+export async function getTodoList(dispatch: Dispatch<TodoAction | UserAction>) {
   dispatch({
     type: TodoActionTypes.GET_LIST,
   });
@@ -48,6 +50,11 @@ export async function getTodoList(dispatch: Dispatch<TodoAction>) {
       type: TodoActionTypes.SET_LIST,
       payload: data,
     });
+
+    await Promise.all(
+      uniq(compact(data.map(todo => todo.assignerId)))
+        .map(id => getUser(dispatch, { id }))
+    );
   }
   else {
     throw new InvalidValueError('get todo list response', { data, error });
