@@ -16,8 +16,8 @@ export type Props<P extends PropsTypes = PropsTypes> = P['Owned'] & P['Page'] & 
 
 export type ComponentTypes<P extends PropsTypes = PropsTypes, Q extends DefaultQuery = DefaultQuery> = {
   Props: Props<P>;
-  StatelessComponent: React.StatelessComponent<Props<P>>;
-  StatelessPageComponent: React.StatelessComponent<Props<P>> & {
+  FunctionComponent: React.FunctionComponent<Props<P>>;
+  PageFunctionComponent: React.FunctionComponent<Props<P>> & {
     getInitialProps?: (context: NextContextWithRedux<Q>) => Promise<P['Page']>
   };
   MapStateToPropsFunc: MapStateToProps<P['State'], P['Owned'] & P['Page'], RootState>;

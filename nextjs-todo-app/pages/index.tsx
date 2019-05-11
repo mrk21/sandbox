@@ -12,7 +12,7 @@ type PropsTypes = types.PropsTypes & {
 };
 type CTypes = types.ComponentTypes<PropsTypes>;
 
-export const IndexPage: CTypes['StatelessPageComponent'] = () => (
+export const IndexPage: CTypes['PageFunctionComponent'] = () => (
   <DefaultLayout>
     <h2>Home</h2>
     <TodoList detailLinkProps={ (id) => ({

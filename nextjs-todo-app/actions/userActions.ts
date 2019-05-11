@@ -12,31 +12,33 @@ export enum UserActionTypes {
   ERROR = 'User/ERROR',
 };
 
-export type GetUserListAction = Action<UserActionTypes.GET_LIST>;
-export type SetUserAction = Action<UserActionTypes.SET_LIST> & {
-  payload: User[];
+export type UserAction = {
+  GetList: Action<UserActionTypes.GET_LIST>;
+  SetList: Action<UserActionTypes.SET_LIST> & {
+    payload: User[];
+  }
+  Get: Action<UserActionTypes.GET> & {
+    payload: {
+      id: string;
+    };
+  };
+  Append: Action<UserActionTypes.APPEND> & {
+    payload: User;
+  };
+  Error: Action<UserActionTypes.ERROR> & {
+    payload: {
+      id: string;
+      error: APIError;
+    };
+  };
 }
-export type GetUserAction = Action<UserActionTypes.GET> & {
-  payload: {
-    id: string;
-  };
-};
-export type AppendUserAction = Action<UserActionTypes.APPEND> & {
-  payload: User;
-};
-export type ErrorUserAction = Action<UserActionTypes.ERROR> & {
-  payload: {
-    id: string;
-    error: APIError;
-  };
-};
-export type UserAction = GetUserListAction | SetUserAction | GetUserAction | AppendUserAction | ErrorUserAction;
+export type UserActions = UserAction[keyof UserAction];
 
 
 /**
  * get list
  */
-export async function getUserList(dispatch: Dispatch<UserAction>) {
+export async function getUserList(dispatch: Dispatch<UserActions>) {
   dispatch({
     type: UserActionTypes.GET_LIST,
   });
@@ -60,7 +62,7 @@ export async function getUserList(dispatch: Dispatch<UserAction>) {
 type GetUserInput = {
   id: string;
 };
-export async function getUser(dispatch: Dispatch<UserAction>, { id }: GetUserInput) {
+export async function getUser(dispatch: Dispatch<UserActions>, { id }: GetUserInput) {
   dispatch({
     type: UserActionTypes.GET,
     payload: { id },
@@ -88,7 +90,7 @@ export async function getUser(dispatch: Dispatch<UserAction>, { id }: GetUserInp
 /**
  * make
  */
-export async function makeUser(dispatch: Dispatch<UserAction>, input: Partial<User>) {
+export async function makeUser(dispatch: Dispatch<UserActions>, input: Partial<User>) {
   const newRecord = makeEntity(input);
   dispatch({
     type: UserActionTypes.APPEND,

@@ -5,7 +5,7 @@ import Link from 'next/link';
 type PropsTypes = types.PropsTypes;
 type CTypes = types.ComponentTypes<PropsTypes>;
 
-export const DefaultLayout: CTypes['StatelessComponent'] = ({ children }) => {
+export const DefaultLayout: CTypes['FunctionComponent'] = ({ children }) => {
   return (
     <article className="page">
       <header className="page__header">

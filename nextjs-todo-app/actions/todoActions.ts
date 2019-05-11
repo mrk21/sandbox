@@ -3,7 +3,7 @@ import { Action, Dispatch } from 'redux';
 import { Todo, makeEntity } from '~/entity/Todo';
 import { APIError } from '~/entity/APIError';
 import * as todoAPI from '~/api/todo';
-import { getUser, UserAction } from '~/actions/userActions';
+import { getUser, UserActions } from '~/actions/userActions';
 import { compact, uniq } from 'lodash';
 
 export enum TodoActionTypes {
@@ -14,31 +14,32 @@ export enum TodoActionTypes {
   ERROR = 'Todo/ERROR',
 };
 
-export type GetTodoListAction = Action<TodoActionTypes.GET_LIST>;
-export type SetTodoAction = Action<TodoActionTypes.SET_LIST> & {
-  payload: Todo[];
+export type TodoAction = {
+  GetList: Action<TodoActionTypes.GET_LIST>;
+  SetList: Action<TodoActionTypes.SET_LIST> & {
+    payload: Todo[];
+  }
+  Get: Action<TodoActionTypes.GET> & {
+    payload: {
+      id: string;
+    };
+  };
+  Append: Action<TodoActionTypes.APPEND> & {
+    payload: Todo;
+  };
+  Error: Action<TodoActionTypes.ERROR> & {
+    payload: {
+      id: string;
+      error: APIError;
+    };
+  };
 }
-export type GetTodoAction = Action<TodoActionTypes.GET> & {
-  payload: {
-    id: string;
-  };
-};
-export type AppendTodoAction = Action<TodoActionTypes.APPEND> & {
-  payload: Todo;
-};
-export type ErrorTodoAction = Action<TodoActionTypes.ERROR> & {
-  payload: {
-    id: string;
-    error: APIError;
-  };
-};
-export type TodoAction = GetTodoListAction | SetTodoAction | GetTodoAction | AppendTodoAction | ErrorTodoAction;
-
+export type TodoActions = TodoAction[keyof TodoAction];
 
 /**
  * get list
  */
-export async function getTodoList(dispatch: Dispatch<TodoAction | UserAction>) {
+export async function getTodoList(dispatch: Dispatch<TodoActions | UserActions>) {
   dispatch({
     type: TodoActionTypes.GET_LIST,
   });
@@ -67,7 +68,7 @@ export async function getTodoList(dispatch: Dispatch<TodoAction | UserAction>) {
 type GetTodoInput = {
   id: string;
 };
-export async function getTodo(dispatch: Dispatch<TodoAction>, { id }: GetTodoInput) {
+export async function getTodo(dispatch: Dispatch<TodoActions | UserActions>, { id }: GetTodoInput) {
   dispatch({
     type: TodoActionTypes.GET,
     payload: { id },
@@ -80,11 +81,32 @@ export async function getTodo(dispatch: Dispatch<TodoAction>, { id }: GetTodoInp
       type: TodoActionTypes.APPEND,
       payload: data,
     });
+
+    if (data.assignerId) {
+      await getUser(dispatch, { id: data.assignerId });
+    }
   }
   else if (error) {
     dispatch({
       type: TodoActionTypes.ERROR,
-      payload: { id, error },
+      payload: { id, error }
+    });
+  }
+  else {
+    throw new InvalidValueError('get todo response', { data, error });
+  }
+}
+
+/**
+ * create
+ */
+export async function createTodo(dispatch: Dispatch<TodoActions>, input: Todo) {
+  const { data, error } = await todoAPI.create(input);
+
+  if (data) {
+    dispatch({
+      type: TodoActionTypes.APPEND,
+      payload: data,
     });
   }
   else {
@@ -95,7 +117,7 @@ export async function getTodo(dispatch: Dispatch<TodoAction>, { id }: GetTodoInp
 /**
  * make
  */
-export async function makeTodo(dispatch: Dispatch<TodoAction>, input: Partial<Todo>) {
+export async function makeTodo(dispatch: Dispatch<TodoActions>, input: Partial<Todo>) {
   const newRecord = makeEntity(input);
   dispatch({
     type: TodoActionTypes.APPEND,

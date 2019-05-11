@@ -18,18 +18,18 @@ type PropsTypes = types.PropsTypes & {
   State: {
     records: Todo[];
     isLoadingAll: boolean;
-    userRecord: (id: string) => User;
+    userRecord: (id: string) => User | undefined;
     isLoadingUser: (id: string) => boolean;
   };
 };
 type CTypes = types.ComponentTypes<PropsTypes>;
 
-export const TodoList: CTypes['StatelessComponent'] = ({ detailLinkProps, isLoadingAll, records, isLoadingUser, userRecord }) => {
+export const TodoList: CTypes['FunctionComponent'] = ({ detailLinkProps, isLoadingAll, records, isLoadingUser, userRecord }) => {
   if (isLoadingAll) {
     return (<div>loading...</div>);
   }
 
-  const Assigner: React.StatelessComponent<{ id: string | null }> = ({ id }) => {
+  const Assigner: React.FunctionComponent<{ id: string | null }> = ({ id }) => {
     if (isNull(id)) {
       return (<p>-</p>);
     }

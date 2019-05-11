@@ -21,7 +21,7 @@ type Query = {
 }
 type CTypes = types.ComponentTypes<PropsTypes, Query>;
 
-export const TodoDetailPage: CTypes['StatelessPageComponent'] = ({ id }) => {
+export const TodoDetailPage: CTypes['PageFunctionComponent'] = ({ id }) => {
   return (
     <DefaultLayout>
       <h2>Todo#{ id }</h2>

@@ -7,15 +7,15 @@ import {
 import { composeWithDevTools } from 'redux-devtools-extension'
 import todoReducer, { TodoState, initialTodoState } from './reducers/todoReducer';
 import userReducer, { UserState, initialUserState } from './reducers/userReducer';
-import { TodoAction } from './actions/todoActions';
-import { UserAction } from './actions/userActions';
+import { TodoActions } from './actions/todoActions';
+import { UserActions } from './actions/userActions';
 
 export type RootState = {
   todo: TodoState,
   user: UserState,
 };
 
-export type RootAction = TodoAction | UserAction;
+export type RootAction = TodoActions | UserActions;
 
 export type AppStore = Store<RootState, RootAction>;
 

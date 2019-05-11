@@ -21,10 +21,10 @@ export async function getList() {
     setTimeout(() => {
       resolve({
         todos: {
-          data: times(Math.round(Math.random() * 10 + 2)).map(() => {
+          data: times(Math.round(Math.random() * 20 + 2)).map(() => {
             const id = uniqueId();
             const assignerId = (() => {
-              const v = Math.round(Math.random() * 7 - 2);
+              const v = Math.round(Math.random() * 30 - 5);
               return v <= 0 ? null : v.toString();
             })();
             return {
@@ -85,6 +85,41 @@ export async function get({ id }: GetInput) {
     }, Math.random() * 900 + 100);
   });
   const todo = (response || {}).todo || {};
+  const data = todo.data || null;
+  const error = todo.error || null;
+  return todoAPIResponse.fromObject({ data, error });
+}
+
+/**
+ * Create
+ */
+type CreateInput = {
+  title: string;
+  description?: string;
+  assignerId?: string | null;
+};
+type CreateRawResponse = undefined | null | {
+  createTodo?: {
+    data?: unknown
+    error?: unknown
+  };
+};
+export async function create(input: CreateInput) {
+  const response = await new Promise<CreateRawResponse>((resolve) => {
+    setTimeout(() => {
+      resolve({
+        createTodo: {
+          data: {
+            id: uniqueId(),
+            title: input.title,
+            description: input.description || '',
+            assignerId: input.assignerId || null,
+          },
+        },
+      });
+    }, Math.random() * 900 + 100);
+  });
+  const todo = (response || {}).createTodo || {};
   const data = todo.data || null;
   const error = todo.error || null;
   return todoAPIResponse.fromObject({ data, error });
