@@ -1,4 +1,3 @@
-import { connect } from 'react-redux';
 import * as types from '~/lib/ComponentTypes';
 import isServer from '~/lib/isServer';
 import { getTodo } from '~/actions/todoActions';
@@ -6,14 +5,8 @@ import DefaultLayout from '~/components/layouts/DefaultLayout';
 import TodoDetail from '~/components/TodoDetail';
 
 type PropsTypes = types.PropsTypes & {
-  Owned: {
-    id: string;
-  }
   Page: {
     id: string;
-  };
-  Dispatch: {
-    getTodo: (input: { id: string }) => Promise<void>;
   };
 };
 type Query = {
@@ -29,22 +22,16 @@ export const TodoDetailPage: CTypes['PageFunctionComponent'] = ({ id }) => {
     </DefaultLayout>
   );
 };
+
 TodoDetailPage.getInitialProps = async (context) => {
   const { id } = context.query;
-  const actions = mapDispatchToProps(context.store.dispatch, { id });
-
   if (isServer) {
-    await actions.getTodo({ id });
+    await getTodo(context.store.dispatch, { id }, { includes: { assigner: true } })
   }
   else {
-    actions.getTodo({ id });
+    getTodo(context.store.dispatch, { id }, { includes: { assigner: true } })
   }
   return { id };
 };
 
-const mapStateToProps: CTypes['MapStateToPropsFunc'] = () => ({});
-const mapDispatchToProps: CTypes['MapDispatchToPropsFunc'] = (dispatch) => ({
-  getTodo: (input) => getTodo(dispatch, input),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(TodoDetailPage);
+export default TodoDetailPage;

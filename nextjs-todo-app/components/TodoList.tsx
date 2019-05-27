@@ -3,10 +3,8 @@ import { connect } from 'react-redux';
 import Link from 'next/link';
 import { Todo } from '~/entity/Todo';
 import * as todo from '~/reducers/todoReducer';
-import * as user from '~/reducers/userReducer';
 import * as types from '~/lib/ComponentTypes';
-import { User } from '~/entity/User';
-import { isNull } from '@/lib/typeHelpers';
+import Assigner from '~/components/Assigner';
 
 type PropsTypes = types.PropsTypes & {
   Owned: {
@@ -18,31 +16,14 @@ type PropsTypes = types.PropsTypes & {
   State: {
     records: Todo[];
     isLoadingAll: boolean;
-    userRecord: (id: string) => User | undefined;
-    isLoadingUser: (id: string) => boolean;
   };
 };
 type CTypes = types.ComponentTypes<PropsTypes>;
 
-export const TodoList: CTypes['FunctionComponent'] = ({ detailLinkProps, isLoadingAll, records, isLoadingUser, userRecord }) => {
+export const TodoList: CTypes['FunctionComponent'] = ({ detailLinkProps, isLoadingAll, records }) => {
   if (isLoadingAll) {
     return (<div>loading...</div>);
   }
-
-  const Assigner: React.FunctionComponent<{ id: string | null }> = ({ id }) => {
-    if (isNull(id)) {
-      return (<p>-</p>);
-    }
-    if (isLoadingUser(id)) {
-      return (<p>loading...</p>);
-    }
-    const user = userRecord(id);
-    if (user) {
-      return (<p>assigner: { user.name }</p>);
-    }
-    return (<p>-</p>);
-  };
-
   return (
     <>
       { records.map((record) => (
@@ -70,8 +51,6 @@ export const TodoList: CTypes['FunctionComponent'] = ({ detailLinkProps, isLoadi
 const mapStateToProps: CTypes['MapStateToPropsFunc'] = (state) => ({
   records: todo.records(state),
   isLoadingAll: todo.isLoadingAll(state),
-  userRecord: (id) => user.record(state, id),
-  isLoadingUser: (id) => user.isLoading(state, id),
 });
 
 const mapDispatchToProps: CTypes['MapDispatchToPropsFunc'] = () => ({});

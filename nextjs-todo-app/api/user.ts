@@ -1,13 +1,14 @@
 import * as user from '~/entity/User';
 import * as list from '~/entity/List';
 import * as apiResponse from '~/entity/APIResponse';
+import { uniq } from 'lodash';
 
 const userList = list.specialize(user);
 const userListAPIResponse = apiResponse.specialize({ data: userList });
 const userAPIResponse = apiResponse.specialize({ data: user });
 
 /**
- * List
+ * GET /users
  */
 type GetListRawResponse = undefined | null | {
   users?: {
@@ -17,6 +18,7 @@ type GetListRawResponse = undefined | null | {
 };
 export async function getList() {
   const response = await new Promise<GetListRawResponse>((resolve) => {
+    console.log(`GET /users`);
     setTimeout(() => {
       resolve({
         users: {
@@ -35,7 +37,49 @@ export async function getList() {
 }
 
 /**
- * Detail
+ * GET /users/batch/:ids
+ */
+type BatchGetRawResponse = undefined | null | {
+  data: {
+    [ key: string ]: {
+      user?: {
+        data?: unknown
+        error?: unknown
+      };
+    }
+  };
+};
+export async function batchGet(paramsList: Array<{ id: string; }>) {
+  const ids = uniq(paramsList.map(({ id }) => id));
+  const response = await new Promise<BatchGetRawResponse>((resolve) => {
+    console.log(`GET /users/batch/${ids.join(',')}`);
+    setTimeout(() => {
+      resolve({
+        data: ids.reduce<any>((result, id) => {
+          result[id] = {
+            user: {
+              data: {
+                id,
+                name: `user ${id}`,
+              },
+            },
+          };
+          return result;
+        }, {})
+      });
+    }, Math.random() * 900 + 100);
+  });
+  const _data: any = response ? response.data : {};
+  let result: { [key: string]: apiResponse.APIResponse<user.User>; } = {};
+
+  Object.entries<any>(_data).forEach((entry: any) => {
+    result[entry[0]] = userAPIResponse.fromObject({ data: entry[1].user.data, error: null });
+  });
+  return result;
+}
+
+/**
+ * GET /users/:id
  */
 type GetInput = {
   id: string;
@@ -48,6 +92,7 @@ type GetRawResponse = undefined | null | {
 };
 export async function get({ id }: GetInput) {
   const response = await new Promise<GetRawResponse>((resolve) => {
+    console.log(`GET /users/${id}`);
     setTimeout(() => {
       if (parseInt(id) <= 0) {
         resolve({

@@ -5,6 +5,7 @@ import { APIError } from '~/entity/APIError';
 import * as todoAPI from '~/api/todo';
 import { getUser, UserActions } from '~/actions/userActions';
 import { compact, uniq } from 'lodash';
+import { throttle } from 'lodash';
 
 export enum TodoActionTypes {
   GET_LIST = 'Todo/GET_LIST',
@@ -36,10 +37,21 @@ export type TodoAction = {
 }
 export type TodoActions = TodoAction[keyof TodoAction];
 
+type IncludeOptions = {
+  includes: {
+    assigner?: boolean;
+  };
+};
+const defaultIncludes: IncludeOptions = {
+  includes: {
+    assigner: false
+  }
+};
+
 /**
  * get list
  */
-export async function getTodoList(dispatch: Dispatch<TodoActions | UserActions>) {
+async function _getTodoList(dispatch: Dispatch<TodoActions | UserActions>, { includes } = defaultIncludes) {
   dispatch({
     type: TodoActionTypes.GET_LIST,
   });
@@ -52,14 +64,22 @@ export async function getTodoList(dispatch: Dispatch<TodoActions | UserActions>)
       payload: data,
     });
 
-    await Promise.all(
-      uniq(compact(data.map(todo => todo.assignerId)))
-        .map(id => getUser(dispatch, { id }))
-    );
+    if (includes.assigner) {
+      await Promise.all(
+        uniq(compact(data.map(todo => todo.assignerId)))
+          .map(id => getUser(dispatch, { id }))
+      );
+    }
   }
   else {
     throw new InvalidValueError('get todo list response', { data, error });
   }
+  return 'hoge!!!';
+}
+const _getTodoListThrottled = throttle(_getTodoList, 1000, { trailing: false });
+export async function getTodoList(dispatch: Dispatch<TodoActions | UserActions>, { includes } = defaultIncludes) {
+  console.log(`@@@ call: getTodoList`);
+  return _getTodoListThrottled(dispatch, { includes });
 }
 
 /**
@@ -68,7 +88,7 @@ export async function getTodoList(dispatch: Dispatch<TodoActions | UserActions>)
 type GetTodoInput = {
   id: string;
 };
-export async function getTodo(dispatch: Dispatch<TodoActions | UserActions>, { id }: GetTodoInput) {
+export async function getTodo(dispatch: Dispatch<TodoActions | UserActions>, { id }: GetTodoInput, { includes } = defaultIncludes) {
   dispatch({
     type: TodoActionTypes.GET,
     payload: { id },
@@ -82,7 +102,7 @@ export async function getTodo(dispatch: Dispatch<TodoActions | UserActions>, { i
       payload: data,
     });
 
-    if (data.assignerId) {
+    if (includes.assigner && data.assignerId) {
       await getUser(dispatch, { id: data.assignerId });
     }
   }

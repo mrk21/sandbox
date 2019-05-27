@@ -1,15 +1,10 @@
-import { connect } from 'react-redux';
 import isServer from '~/lib/isServer';
 import * as types from '~/lib/ComponentTypes';
 import { getTodoList } from '~/actions/todoActions';
 import DefaultLayout from '~/components/layouts/DefaultLayout';
 import TodoList from '~/components/TodoList';
 
-type PropsTypes = types.PropsTypes & {
-  Dispatch: {
-    getTodoList: () => Promise<void>;
-  };
-};
+type PropsTypes = types.PropsTypes & {};
 type CTypes = types.ComponentTypes<PropsTypes>;
 
 export const IndexPage: CTypes['PageFunctionComponent'] = () => (
@@ -24,17 +19,16 @@ export const IndexPage: CTypes['PageFunctionComponent'] = () => (
 
 IndexPage.getInitialProps = async (context) => {
   if (isServer) {
-    await getTodoList(context.store.dispatch);
+    await getTodoList(context.store.dispatch, { includes: { assigner: true } });
   }
   else {
-    getTodoList(context.store.dispatch);
+    getTodoList(context.store.dispatch, { includes: { assigner: true } }).then((a) => { console.log(`### fetched 1: ${a}`); });
+    getTodoList(context.store.dispatch, { includes: { assigner: true } }).then((a) => { console.log(`### fetched 2: ${a}`); });
+    getTodoList(context.store.dispatch, { includes: { assigner: true } }).then((a) => { console.log(`### fetched 3: ${a}`); });
+    getTodoList(context.store.dispatch, { includes: { assigner: true } }).then((a) => { console.log(`### fetched 4: ${a}`); });
+    getTodoList(context.store.dispatch, { includes: { assigner: true } }).then((a) => { console.log(`### fetched 5: ${a}`); });
   }
   return {};
 };
 
-const mapStateToProps: CTypes['MapStateToPropsFunc'] = () => ({});
-const mapDispatchToProps: CTypes['MapDispatchToPropsFunc'] = (dispatch) => ({
-  getTodoList: () => getTodoList(dispatch),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(IndexPage);
+export default IndexPage;

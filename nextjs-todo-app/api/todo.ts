@@ -8,7 +8,7 @@ const todoListAPIResponse = apiResponse.specialize({ data: todoList });
 const todoAPIResponse = apiResponse.specialize({ data: todo });
 
 /**
- * List
+ * GET /todos
  */
 type GetListRawResponse = undefined | null | {
   todos?: {
@@ -18,6 +18,7 @@ type GetListRawResponse = undefined | null | {
 };
 export async function getList() {
   const response = await new Promise<GetListRawResponse>((resolve) => {
+    console.log('GET /todos');
     setTimeout(() => {
       resolve({
         todos: {
@@ -45,7 +46,7 @@ export async function getList() {
 }
 
 /**
- * Detail
+ * GET /todos/:id
  */
 type GetInput = {
   id: string;
@@ -58,6 +59,7 @@ type GetRawResponse = undefined | null | {
 };
 export async function get({ id }: GetInput) {
   const response = await new Promise<GetRawResponse>((resolve) => {
+    console.log(`GET /todos/${id}`);
     setTimeout(() => {
       if (parseInt(id) <= 0) {
         resolve({
@@ -91,7 +93,7 @@ export async function get({ id }: GetInput) {
 }
 
 /**
- * Create
+ * POST /todos
  */
 type CreateInput = {
   title: string;
@@ -106,6 +108,7 @@ type CreateRawResponse = undefined | null | {
 };
 export async function create(input: CreateInput) {
   const response = await new Promise<CreateRawResponse>((resolve) => {
+    console.log('POST /todos');
     setTimeout(() => {
       resolve({
         createTodo: {
