@@ -1,12 +1,11 @@
 import InvalidValueError from '~/lib/InvalidValueError';
-import { Action, Dispatch } from 'redux';
 import { User, makeEntity } from '~/entity/User';
 import { APIError } from '~/entity/APIError';
 import * as userAPI from '~/api/user';
-import { APIResponse } from '~/entity/APIResponse';
 import batchRequest from '~/lib/async/BatchRequest';
+import { AppDispatch } from '~/store';
 
-export enum UserActionTypes {
+export const enum UserActionTypes {
   GET_LIST = 'User/GET_LIST',
   SET_LIST = 'User/SET_LIST',
   GET = 'User/GET',
@@ -14,33 +13,37 @@ export enum UserActionTypes {
   ERROR = 'User/ERROR',
 };
 
-export type UserAction = {
-  GetList: Action<UserActionTypes.GET_LIST>;
-  SetList: Action<UserActionTypes.SET_LIST> & {
+export type UserActionTree = {
+  GetList: {
+    type: UserActionTypes.GET_LIST;
+  };
+  SetList: {
+    type: UserActionTypes.SET_LIST;
     payload: User[];
-  }
-  Get: Action<UserActionTypes.GET> & {
+  };
+  Get: {
+    type: UserActionTypes.GET;
     payload: {
       id: string;
     };
   };
-  Append: Action<UserActionTypes.APPEND> & {
+  Append: {
+    type: UserActionTypes.APPEND;
     payload: User;
   };
-  Error: Action<UserActionTypes.ERROR> & {
+  Error: {
+    type: UserActionTypes.ERROR;
     payload: {
       id: string;
       error: APIError;
     };
   };
-}
-export type UserActions = UserAction[keyof UserAction];
-
+};
 
 /**
  * get list
  */
-export async function getUserList(dispatch: Dispatch<UserActions>) {
+export async function getUserList(dispatch: AppDispatch) {
   dispatch({
     type: UserActionTypes.GET_LIST,
   });
@@ -70,7 +73,7 @@ const getUserBatched = batchRequest({
   batchAPI: userAPI.batchGet,
   paramsToId: ({ id }) => id,
 });
-export async function getUser(dispatch: Dispatch<UserActions>, { id }: GetUserInput) {
+export async function getUser(dispatch: AppDispatch, { id }: GetUserInput) {
   dispatch({
     type: UserActionTypes.GET,
     payload: { id },
@@ -99,7 +102,7 @@ export async function getUser(dispatch: Dispatch<UserActions>, { id }: GetUserIn
 /**
  * make
  */
-export async function makeUser(dispatch: Dispatch<UserActions>, input: Partial<User>) {
+export async function makeUser(dispatch: AppDispatch, input: Partial<User>) {
   const newRecord = makeEntity(input);
   dispatch({
     type: UserActionTypes.APPEND,

@@ -1,13 +1,13 @@
 import InvalidValueError from '~/lib/InvalidValueError';
-import { Action, Dispatch } from 'redux';
 import { Todo, makeEntity } from '~/entity/Todo';
 import { APIError } from '~/entity/APIError';
 import * as todoAPI from '~/api/todo';
-import { getUser, UserActions } from '~/actions/userActions';
+import { getUser } from '~/actions/userActions';
 import { compact, uniq } from 'lodash';
 import { throttle } from 'lodash';
+import { AppDispatch } from '~/store';
 
-export enum TodoActionTypes {
+export const enum TodoActionTypes {
   GET_LIST = 'Todo/GET_LIST',
   SET_LIST = 'Todo/SET_LIST',
   GET = 'Todo/GET',
@@ -15,27 +15,32 @@ export enum TodoActionTypes {
   ERROR = 'Todo/ERROR',
 };
 
-export type TodoAction = {
-  GetList: Action<TodoActionTypes.GET_LIST>;
-  SetList: Action<TodoActionTypes.SET_LIST> & {
+export type TodoActionTree = {
+  GetList: {
+    type: TodoActionTypes.GET_LIST;
+  };
+  SetList: {
+    type: TodoActionTypes.SET_LIST;
     payload: Todo[];
-  }
-  Get: Action<TodoActionTypes.GET> & {
+  };
+  Get: {
+    type: TodoActionTypes.GET;
     payload: {
       id: string;
     };
   };
-  Append: Action<TodoActionTypes.APPEND> & {
+  Append: {
+    type: TodoActionTypes.APPEND;
     payload: Todo;
   };
-  Error: Action<TodoActionTypes.ERROR> & {
+  Error: {
+    type: TodoActionTypes.ERROR;
     payload: {
       id: string;
       error: APIError;
     };
   };
-}
-export type TodoActions = TodoAction[keyof TodoAction];
+};
 
 type IncludeOptions = {
   includes: {
@@ -51,7 +56,7 @@ const defaultIncludes: IncludeOptions = {
 /**
  * get list
  */
-async function _getTodoList(dispatch: Dispatch<TodoActions | UserActions>, { includes } = defaultIncludes) {
+async function _getTodoList(dispatch: AppDispatch, { includes } = defaultIncludes) {
   dispatch({
     type: TodoActionTypes.GET_LIST,
   });
@@ -77,7 +82,7 @@ async function _getTodoList(dispatch: Dispatch<TodoActions | UserActions>, { inc
   return 'hoge!!!';
 }
 const _getTodoListThrottled = throttle(_getTodoList, 1000, { trailing: false });
-export async function getTodoList(dispatch: Dispatch<TodoActions | UserActions>, { includes } = defaultIncludes) {
+export async function getTodoList(dispatch: AppDispatch, { includes } = defaultIncludes) {
   console.log(`@@@ call: getTodoList`);
   return _getTodoListThrottled(dispatch, { includes });
 }
@@ -88,7 +93,7 @@ export async function getTodoList(dispatch: Dispatch<TodoActions | UserActions>,
 type GetTodoInput = {
   id: string;
 };
-export async function getTodo(dispatch: Dispatch<TodoActions | UserActions>, { id }: GetTodoInput, { includes } = defaultIncludes) {
+export async function getTodo(dispatch: AppDispatch, { id }: GetTodoInput, { includes } = defaultIncludes) {
   dispatch({
     type: TodoActionTypes.GET,
     payload: { id },
@@ -120,7 +125,7 @@ export async function getTodo(dispatch: Dispatch<TodoActions | UserActions>, { i
 /**
  * create
  */
-export async function createTodo(dispatch: Dispatch<TodoActions>, input: Todo) {
+export async function createTodo(dispatch: AppDispatch, input: Todo) {
   const { data, error } = await todoAPI.create(input);
 
   if (data) {
@@ -137,7 +142,7 @@ export async function createTodo(dispatch: Dispatch<TodoActions>, input: Todo) {
 /**
  * make
  */
-export async function makeTodo(dispatch: Dispatch<TodoActions>, input: Partial<Todo>) {
+export async function makeTodo(dispatch: AppDispatch, input: Partial<Todo>) {
   const newRecord = makeEntity(input);
   dispatch({
     type: TodoActionTypes.APPEND,

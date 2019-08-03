@@ -1,9 +1,9 @@
 import { Reducer } from 'redux';
 import { Todo } from '~/entity/Todo';
 import { APIError } from '~/entity/APIError';
-import { TodoActionTypes, TodoActions } from '../actions/todoActions';
+import { TodoActionTypes } from '../actions/todoActions';
 import { cloneDeep } from 'lodash';
-import { RootState } from '~/store';
+import { RootState, AppActions } from '~/store';
 
 export type TodoState = {
   records: Todo[];
@@ -13,7 +13,7 @@ export type TodoState = {
   loadingAll: boolean;
 };
 
-export type TodoReducer = Reducer<TodoState, TodoActions>;
+export type TodoReducer = Reducer<TodoState, AppActions>;
 
 export const initialTodoState: TodoState = {
   records: [],

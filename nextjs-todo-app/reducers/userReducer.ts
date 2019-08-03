@@ -1,9 +1,9 @@
 import { Reducer } from 'redux';
 import { User } from '~/entity/User';
 import { APIError } from '~/entity/APIError';
-import { UserActionTypes, UserActions } from '../actions/userActions';
+import { UserActionTypes } from '../actions/userActions';
 import { cloneDeep } from 'lodash';
-import { RootState } from '~/store';
+import { RootState, AppActions } from '~/store';
 
 export type UserState = {
   records: User[];
@@ -13,7 +13,7 @@ export type UserState = {
   loadingAll: boolean;
 };
 
-export type UserReducer = Reducer<UserState, UserActions>;
+export type UserReducer = Reducer<UserState, AppActions>;
 
 export const initialUserState: UserState = {
   records: [],
