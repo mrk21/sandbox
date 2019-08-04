@@ -7,7 +7,7 @@ import { compact, uniq } from 'lodash';
 import { throttle } from 'lodash';
 import { AppDispatch } from '~/store';
 
-export const enum TodoActionTypes {
+export enum TodoActionTypes {
   GET_LIST = 'Todo/GET_LIST',
   SET_LIST = 'Todo/SET_LIST',
   GET = 'Todo/GET',

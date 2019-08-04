@@ -5,7 +5,7 @@ import * as userAPI from '~/api/user';
 import batchRequest from '~/lib/async/BatchRequest';
 import { AppDispatch } from '~/store';
 
-export const enum UserActionTypes {
+export enum UserActionTypes {
   GET_LIST = 'User/GET_LIST',
   SET_LIST = 'User/SET_LIST',
   GET = 'User/GET',
