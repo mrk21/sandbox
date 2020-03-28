@@ -11,8 +11,16 @@ nodenv install
 npm install
 ```
 
-## Start
+## How to use
 
 ```sh
+# execute on node
 npm run exec
+
+# build by webpack
+npm run build
 ```
+
+## Refer to
+
+- [woutervh-/typescript-is](https://github.com/woutervh-/typescript-is)
