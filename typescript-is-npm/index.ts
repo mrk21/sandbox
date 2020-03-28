@@ -5,10 +5,14 @@ type User = {
   name: string;
 };
 
+function decode(object: any): User {
+  return assertType<User>(object);
+}
+
 console.log('## When an object has valid properties');
 try {
   const object = { id: 1, name: 'hoge' }
-  const user = assertType<User>(object);
+  const user = decode(object);
   console.log(user); // OK
 } catch (error) {
   console.log(error);
@@ -18,7 +22,7 @@ console.log('');
 console.log('## When an object has valid properties and unnecessary properties');
 try {
   const object = { id: 1, name: 'hoge', value: 1 }
-  const user = assertType<User>(object);
+  const user = decode(object);
   console.log(user); // OK
 } catch (error) {
   console.log(error);
@@ -28,7 +32,7 @@ console.log('');
 console.log('## When an object has invalid properties');
 try {
   const object = { foo: '1' }
-  const user = assertType<User>(object);
+  const user = decode(object);
   console.log(user);
 } catch (error) {
   // TypeGuardError: validation failed at object: expected 'id' in object
