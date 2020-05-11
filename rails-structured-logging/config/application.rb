@@ -31,5 +31,11 @@ module RailsStructuredLogging
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Active Job
+    config.active_job.queue_adapter = :sidekiq
+
+    # logging
+    config.log_tags = [ :request_id ]
   end
 end
