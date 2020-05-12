@@ -39,7 +39,13 @@ module RailsStructuredLogging
 
     # logging
     config.log_tags = [ 'Server', :request_id ]
-    config.logger = Logging::JsonStructuredTaggedLogging.new(Logger.new(STDOUT))
-    config.colorize_logging = false
+
+    if Rails.const_defined?(:Command) && Rails::Command.const_defined?(:ConsoleCommand)
+      config.logger = ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))
+      config.colorize_logging = true
+    else
+      config.logger = Logging::JsonStructuredTaggedLogging.new(Logger.new(STDOUT))
+      config.colorize_logging = false
+    end
   end
 end
