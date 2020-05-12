@@ -17,8 +17,8 @@ module Logging
             severity: severity.to_s,
             timestamp: timestamp.iso8601,
             progname: progname.to_s,
-            message: message.to_s,
             tags: tags.map(&:to_s),
+            message: message.to_s,
           }
         }
       end
