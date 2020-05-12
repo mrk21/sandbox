@@ -36,6 +36,6 @@ module RailsStructuredLogging
     config.active_job.queue_adapter = :sidekiq
 
     # logging
-    config.log_tags = [ :request_id ]
+    config.log_tags = [ 'Server', :request_id ]
   end
 end
