@@ -19,6 +19,8 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+require_relative '../lib/logging/json_structured_tagged_logging'
+
 module RailsStructuredLogging
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -37,5 +39,7 @@ module RailsStructuredLogging
 
     # logging
     config.log_tags = [ 'Server', :request_id ]
+    config.logger = Logging::JsonStructuredTaggedLogging.new(Logger.new(STDOUT))
+    config.colorize_logging = false
   end
 end
