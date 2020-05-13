@@ -52,3 +52,39 @@ COPY ./docker/app/bashrc.sh /root/.bashrc
 # Make application directory
 RUN mkdir -p $APP_HOME
 WORKDIR $APP_HOME
+
+#------------------------------------------------------------------------------
+# for staging/production
+#------------------------------------------------------------------------------
+FROM base AS bundle
+
+# Environments and parameters
+ARG RAILS_ENV="production"
+ARG REVISION=""
+
+ENV RAILS_SERVE_STATIC_FILES 1
+ENV RAILS_LOG_TO_STDOUT 1
+
+# Install gems
+ADD Gemfile $APP_HOME/Gemfile
+ADD Gemfile.lock $APP_HOME/Gemfile.lock
+RUN bundle install
+
+# Add project files
+ADD . $APP_HOME
+RUN mkdir -p $APP_HOME/log && \
+    mkdir -p $APP_HOME/tmp/pids && \
+    mkdir -p $APP_HOME/tmp/sockets && \
+    mkdir -p $APP_HOME/tmp/cache
+
+# Register ENV from ARG
+ENV RAILS_ENV $RAILS_ENV
+ENV REVISION $REVISION
+
+# Run commands
+EXPOSE 3000
+CMD [ \
+    "codep", \
+        "1=puma -C config/puma.rb", \
+        "2=bundle exec sidekiq" \
+]
