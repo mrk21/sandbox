@@ -1,0 +1,12 @@
+---
+version: '3.5'
+services:
+  app:
+    image: ${APP_IMAGE}
+    build:
+      context: ..
+      dockerfile: docker/app/Dockerfile
+      target: bundle
+      args:
+        RAILS_ENV: ${RAILS_ENV}
+        REVISION: ${REVISION}

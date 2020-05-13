@@ -16,3 +16,7 @@ development:
 test:
   <<: *base
   database: rails_structured_logging_test
+
+production:
+  <<: *base
+  database: rails_structured_logging_production

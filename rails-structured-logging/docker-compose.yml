@@ -13,7 +13,7 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
 
   redis:
-    image: redis:6.0
+    image: redis:5.0
     init: true
     ports:
       - ${DOCKER_HOST_REDIS_PORT:-6379}:6379

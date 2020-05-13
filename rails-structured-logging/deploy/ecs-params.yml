@@ -1,0 +1,37 @@
+---
+# @see Using ECS parameters - aws/amazon-ecs-cli https://github.com/aws/amazon-ecs-cli#using-ecs-parameters
+version: 1
+task_definition:
+  ecs_network_mode: awsvpc
+  task_role_arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs-test-ecs-task-role
+  task_execution_role: ecsTaskExecutionRole
+  services:
+    app:
+      essential: true
+      mem_reservation: 512M
+      secrets:
+        - name: DB_HOST
+          value_from: ecs-test_db-host
+        - name: DB_PORT
+          value_from: ecs-test_db-port
+        - name: DB_USER
+          value_from: ecs-test_db-user
+        - name: DB_PASSWORD
+          value_from: ecs-test_db-password
+        - name: REDIS_HOST
+          value_from: ecs-test_redis-host
+        - name: REDIS_PORT
+          value_from: ecs-test_redis-port
+
+run_params:
+  network_configuration:
+    awsvpc_configuration:
+      subnets: ${SUBNETS}
+      security_groups: ${SECURITY_GROUPS}
+      assign_public_ip: DISABLED
+  task_placement:
+    strategy:
+      - type: spread
+        field: attribute:ecs.availability-zone
+      - type: spread
+        field: instanceId

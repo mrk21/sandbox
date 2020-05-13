@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   protected
 
   def error_404(e)
-    set_lograge_exception(e)
+    set_lograge_exception(e, level: 'WARN')
     render plain: '404'
   end
 
@@ -24,6 +24,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # action --[exception]--> rescue_from (call set_lograge_exception) --> append_info_to_payload
   # @see https://tech.actindi.net/2017/08/28/rails-cloudwatchlogs.html
   def set_lograge_exception(e, level: 'ERROR')
     @lograge_exception = e
@@ -31,6 +32,6 @@ class ApplicationController < ActionController::Base
   end
 
   def set_lograge_level(level)
-    @lograge_level = level
+    @lograge_level = level.to_s.upcase
   end
 end
