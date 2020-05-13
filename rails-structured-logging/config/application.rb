@@ -50,7 +50,7 @@ module RailsStructuredLogging
 
     ActiveJob::Base.logger = Logging::JsonStructuredTaggedLogging.new(ActiveJob::Base.logger)
     Sidekiq.logger = Logging::JsonStructuredTaggedLogging.new(Sidekiq.logger)
-    Sidekiq.logger.push_tags 'Sidekiq'
+    Sidekiq.logger.push_tags('Sidekiq')
 
     console do
       Rails.logger.push_tags('Console')

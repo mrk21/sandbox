@@ -1,6 +1,7 @@
 require 'sidekiq/job_logger'
 
 module Logging
+  # @see https://github.com/mperham/sidekiq/blob/v6.0.7/lib/sidekiq/job_logger.rb
   class SidekiqJobLogger < Sidekiq::JobLogger
     def call(*_args)
       @logger.push_tags 'Sidekiq' if @logger.formatter.current_tags.blank?
