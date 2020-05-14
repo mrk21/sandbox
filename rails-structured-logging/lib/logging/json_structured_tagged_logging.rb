@@ -1,36 +1,29 @@
+require_relative './entity'
+
 module Logging
   # Wraps any Logger object to provide tagging and JSON structured capabilities.
   #
   #   logger = Logging::JsonStructuredTaggedLogging.new(Logger.new(STDOUT))
-  #   logger.tagged('BCX') { logger.info 'Stuff' }                            # Logs {"severity":"INFO","timestamp":"2020-05-12T07:06:08+00:00","progname":"","message":"Stuff","tags":["BCX"]}
-  #   logger.tagged('BCX', "Jason") { logger.info 'Stuff' }                   # Logs {"severity":"INFO","timestamp":"2020-05-12T07:06:22+00:00","progname":"","message":"Stuff","tags":["BCX","Jason"]}
-  #   logger.tagged('BCX') { logger.tagged('Jason') { logger.info 'Stuff' } } # Logs {"severity":"INFO","timestamp":"2020-05-12T07:06:30+00:00","progname":"","message":"Stuff","tags":["BCX","Jason"]}
+  #   logger.tagged('BCX') { logger.info 'Stuff' }                            # Logs {"type":"rails","time":"2020-05-14T06:38:25Z","level":"INFO","sub_type":"other","request_id":null,"job_name":null,"job_id":null,"message":"Stuff","tags":["BCX"]}
+  #   logger.tagged('BCX', "Jason") { logger.info 'Stuff' }                   # Logs {"type":"rails","time":"2020-05-14T06:38:42Z","level":"INFO","sub_type":"other","request_id":null,"job_name":null,"job_id":null,"message":"Stuff","tags":["BCX","Jason"]}
+  #   logger.tagged('BCX') { logger.tagged('Jason') { logger.info 'Stuff' } } # Logs {"type":"rails","time":"2020-05-14T06:38:51Z","level":"INFO","sub_type":"other","request_id":null,"job_name":null,"job_id":null,"message":"Stuff","tags":["BCX","Jason"]}
   #
   # @see https://github.com/rails/rails/blob/v6.0.3/activesupport/lib/active_support/tagged_logging.rb
   module JsonStructuredTaggedLogging
     module Formatter
-      attr_accessor :structurere
-
-      def default_structurere
-        ->(severity, timestamp, progname, message, tags) {
-          {
-            severity: severity.to_s,
-            timestamp: timestamp.iso8601,
-            progname: progname.to_s,
-            tags: tags.map(&:to_s),
-            message: message.to_s,
-          }
-        }
-      end
-
-      def call(severity, timestamp, progname, message)
-        result = (structurere || default_structurere).call(severity, timestamp, progname, message, current_tags)
+      def call(severity, timestamp, _progname, message)
+        result = Logging::Entity::RailsLog.new(
+          time: timestamp,
+          level: severity,
+          message: message,
+          tags: current_tags
+        )
         result = result.to_json + "\n"
         result
       end
     end
 
-    def self.new(logger, structurere: nil)
+    def self.new(logger)
       logger = if logger.respond_to?(:tagged)
         logger.dup
       else
@@ -38,7 +31,6 @@ module Logging
       end
 
       logger.formatter.extend Formatter
-      logger.formatter.structurere = structurere
       logger
     end
   end
