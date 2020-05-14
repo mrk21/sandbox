@@ -53,18 +53,20 @@ module Logging
       end
 
       attr_accessor :sub_type
-      attr_accessor :request_id
-      attr_accessor :message
       attr_accessor :tags
+      attr_accessor :request_id
+      attr_accessor :job_name
+      attr_accessor :job_id
+      attr_accessor :message
 
       def initialize(time:, level:, message:, tags:)
         super(type: :rails, time: time, level: level)
         @sub_type = nil
+        @tags = tags
         @request_id = nil
         @job_name = nil
         @job_id = nil
         @message = message
-        @tags = tags
 
         case @tags[0]
         when 'Server'

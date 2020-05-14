@@ -31,6 +31,7 @@ module Logging
       end
 
       logger.formatter.extend Formatter
+      logger.extend self
       logger
     end
   end
