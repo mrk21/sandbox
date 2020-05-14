@@ -40,8 +40,9 @@ module RailsStructuredLogging
     # logging
     config.log_tags = [ 'Server', :request_id ]
 
-    if Rails.const_defined?(:Command) && Rails::Command.const_defined?(:ConsoleCommand)
+    if $is_boot_rails_console
       config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(STDOUT))
+      config.logger.push_tags('Console')
       config.colorize_logging = true
     else
       config.logger = Logging::JsonStructuredTaggedLogging.new(ActiveSupport::Logger.new(STDOUT))
@@ -51,9 +52,5 @@ module RailsStructuredLogging
     ActiveJob::Base.logger = Logging::JsonStructuredTaggedLogging.new(ActiveJob::Base.logger)
     Sidekiq.logger = Logging::JsonStructuredTaggedLogging.new(Sidekiq.logger)
     Sidekiq.logger.push_tags('Sidekiq')
-
-    console do
-      Rails.logger.push_tags('Console')
-    end
   end
 end
