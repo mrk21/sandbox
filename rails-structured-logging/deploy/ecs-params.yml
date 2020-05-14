@@ -2,7 +2,7 @@
 # @see Using ECS parameters - aws/amazon-ecs-cli https://github.com/aws/amazon-ecs-cli#using-ecs-parameters
 version: 1
 task_definition:
-  ecs_network_mode: awsvpc
+  ecs_network_mode: bridge
   task_role_arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs-test-ecs-task-role
   task_execution_role: ecsTaskExecutionRole
   services:
