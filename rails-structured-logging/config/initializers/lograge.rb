@@ -2,9 +2,6 @@ Rails.application.configure do
   config.lograge.enabled = true
   config.lograge.keep_original_rails_log = true
 
-  config.lograge.logger = config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(STDOUT))
-  config.lograge.formatter = Lograge::Formatters::Json.new
-
   config.lograge.custom_options = lambda do |event|
     exceptions = %w(controller action format authenticity_token)
     data = {

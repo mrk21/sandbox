@@ -1,12 +1,18 @@
 class ApplicationController < ActionController::Base
   before_action :set_request_time
-  rescue_from ActiveRecord::RecordNotFound, with: :error_404
+  rescue_from StandardError, with: :handle_error_500
+  rescue_from ActiveRecord::RecordNotFound, with: :handle_error_404
 
-  protected
+  private
 
-  def error_404(e)
-    set_lograge_exception(e, level: 'WARN')
-    render plain: '404'
+  def handle_error_404(e)
+    log_exception(e, level: 'WARN')
+    render plain: 'error 404'
+  end
+
+  def handle_error_500(e)
+    log_exception(e)
+    render plain: 'error 500'
   end
 
   def set_request_time
@@ -31,12 +37,16 @@ class ApplicationController < ActionController::Base
 
   # action --[exception]--> rescue_from (call set_lograge_exception) --> append_info_to_payload
   # @see https://tech.actindi.net/2017/08/28/rails-cloudwatchlogs.html
-  def set_lograge_exception(e, level: 'ERROR')
+  def log_exception(e, level: 'ERROR')
+    level = level.to_s.upcase
+    message = case level
+    when 'WARN'
+      e.inspect
+    else
+      [e.inspect, *e.backtrace].join("\n")
+    end
+    Rails.logger.send(level.downcase, message)
     @lograge_exception = e
-    set_lograge_level(level)
-  end
-
-  def set_lograge_level(level)
-    @lograge_level = level.to_s.upcase
+    @lograge_level = level
   end
 end

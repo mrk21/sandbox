@@ -24,12 +24,7 @@ module Logging
     end
 
     def self.new(logger)
-      logger = if logger.respond_to?(:tagged)
-        logger.dup
-      else
-        ActiveSupport::TaggedLogging.new(logger)
-      end
-
+      logger = ActiveSupport::TaggedLogging.new(logger) unless logger.respond_to?(:tagged)
       logger.formatter.extend Formatter
       logger.extend self
       logger

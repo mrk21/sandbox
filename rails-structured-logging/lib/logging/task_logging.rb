@@ -1,3 +1,5 @@
+require_relative './default_tagged_logging'
+
 module Logging
   module TaskLogging
     cattr_accessor :logger_creator, default: ->{ ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(STDOUT)) }

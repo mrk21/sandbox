@@ -25,11 +25,11 @@ module Logging
         @type = self.class.fetch_type(type)
         @time = case time
         when String
-          Time.zone.parse(time).iso8601
+          Time.zone.parse(time).iso8601(6)
         when Integer, Float
-          Time.zone.at(time).iso8601
+          Time.zone.at(time).iso8601(6)
         when Time, ActiveSupport::TimeWithZone
-          time.iso8601
+          time.iso8601(6)
         else
           raise ArgumentError, "Invalid time: #{time.inspect}"
         end

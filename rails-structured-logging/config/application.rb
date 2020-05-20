@@ -38,23 +38,34 @@ module RailsStructuredLogging
     config.active_job.queue_adapter = :sidekiq
 
     # logging
-    config.log_tags = [ 'Server', :request_id ]
+    logger_type = Rails.env.production? ? :structure : :raw
+
+    create_logger = ->(type: :raw, default_tags: []){
+      logger = ActiveSupport::Logger.new(STDOUT)
+      logger.formatter =  Logger::Formatter.new
+      logger = case type
+      when :structure then Logging::JsonStructuredTaggedLogging.new(logger)
+      when :raw then ActiveSupport::TaggedLogging.new(logger)
+      end
+      logger = Logging::DefaultTaggedLogging.new(logger, default_tags: default_tags)
+      logger
+    }
+
+    config.log_tags = [ 'Server', :method, ->(req){ URI.parse(req.fullpath).path }, :request_id ]
 
     if $is_boot_rails_console
-      config.logger = ActiveSupport::TaggedLogging.new(ActiveSupport::Logger.new(STDOUT))
-      config.logger = Logging::DefaultTaggedLogging.new(config.logger, default_tags: ['Console'])
+      config.logger = create_logger.call(type: :raw, default_tags: ['Console'])
       config.colorize_logging = true
     else
-      config.logger = Logging::JsonStructuredTaggedLogging.new(ActiveSupport::Logger.new(STDOUT))
-      config.colorize_logging = false
+      config.logger = create_logger.call(type: logger_type)
+      config.colorize_logging = logger_type == :raw
     end
 
-    ActiveJob::Base.logger = Logging::JsonStructuredTaggedLogging.new(ActiveJob::Base.logger)
-    Sidekiq.logger = Logging::JsonStructuredTaggedLogging.new(Sidekiq.logger)
-    Sidekiq.logger = Logging::DefaultTaggedLogging.new(Sidekiq.logger, default_tags: ['Sidekiq'])
+    ActiveJob::Base.logger = create_logger.call(type: logger_type)
+    Sidekiq.logger = create_logger.call(type: logger_type, default_tags: ['Sidekiq'])
+    Logging::TaskLogging.logger_creator = ->{ create_logger.call(type: logger_type) }
 
-    Logging::TaskLogging.logger_creator = -> {
-      Logging::JsonStructuredTaggedLogging.new(ActiveSupport::Logger.new(STDOUT))
-    }
+    config.lograge.logger = ActiveSupport::Logger.new(STDOUT)
+    config.lograge.formatter = Lograge::Formatters::Json.new
   end
 end
