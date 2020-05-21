@@ -31,7 +31,7 @@ class ApplicationController < ActionController::Base
     if @lograge_exception.present?
       e = @lograge_exception
       payload[:exception_object] ||= e
-      payload[:exception] ||= [e.class, e.message]
+      payload[:exception] ||= [e.class.name, e.message]
     end
   end
 
