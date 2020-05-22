@@ -1,4 +1,13 @@
 class ArticlesController < ApplicationController
+  def show
+    article = Article.find(params[:id])
+    options = {
+      include: [:author]
+    }
+    json_string = ArticleSerializer.new(article, options).serialized_json
+    render json: json_string
+  end
+
   def index
     articles = Article.page(params[:page]).per(params[:per])
     options = {
