@@ -1,0 +1,5 @@
+#-------------------------------------------------------------------------------
+# Docker
+#-------------------------------------------------------------------------------
+export DOCKER_HOST_APP_PORT=3000   # You can access to rails server by http://127.0.0.1:${DOCKER_HOST_APP_PORT}
+export DOCKER_HOST_DB_PORT=3306    # You can access to mysql server by tcp://root:@127.0.0.1:${DOCKER_HOST_DB_PORT}
