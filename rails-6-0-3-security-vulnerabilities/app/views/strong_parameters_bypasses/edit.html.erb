@@ -1,0 +1,15 @@
+<h2>Edit User</h2>
+
+<%= form_with url: strong_parameters_bypass_path, model: @record do |f| %>
+  <p>
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </p>
+  <% if @is_include_is_admin %>
+    <p>
+      <%= f.label :is_admin %>
+      <%= f.number_field :is_admin, value: 1 %>
+    </p>
+  <% end %>
+  <%= f.submit %>
+<% end %>
