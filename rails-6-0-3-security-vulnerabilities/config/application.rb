@@ -15,5 +15,14 @@ module Rails603SecurityVulnerabilities
     # Application configuration can go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded after loading
     # the framework and any gems in your application.
+
+    # cache store
+    config.cache_store = :redis_store, "redis://#{ENV.fetch('REDIS_HOST')}:#{ENV.fetch('REDIS_PORT')}/0"
+    config.action_controller.perform_caching = true
+    config.action_controller.enable_fragment_cache_logging = true
+    config.active_record.cache_versioning = false
+    config.public_file_server.headers = {
+      'Cache-Control' => "public, max-age=#{3.minutes.to_i}"
+    }
   end
 end

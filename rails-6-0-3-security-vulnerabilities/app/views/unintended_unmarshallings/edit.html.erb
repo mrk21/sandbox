@@ -1,0 +1,15 @@
+<%= form_with url: unintended_unmarshalling_path do |f| %>
+  <p>
+      <%= f.label :current_data_value %>
+      <code style="background: #eee; padding: 5px;"><%= @current_data.inspect %></code>
+  </p>
+  <p>
+    <%= f.label :new_data_value %>
+    <code style="background: #eee; padding: 5px;"><%= @new_data.inspect %></code>
+  </p>
+  <p>
+    <%= f.label :new_data %>
+    <%= f.text_area :new_data, cols: 100, rows: 10, value: @new_data %>
+  </p>
+  <%= f.submit %>
+<% end %>

@@ -43,3 +43,7 @@ docker-compose run app rails db:setup
 docker-compose up
 open http://localhost:${DOCKER_HOST_APP_PORT}/
 ```
+
+## Refer to
+
+- [Rails 5.2.4.3 and 6.0.3.1 have been released | Riding Rails](https://weblog.rubyonrails.org/2020/5/18/Rails-5-2-4-3-and-6-0-3-1-have-been-released/)
