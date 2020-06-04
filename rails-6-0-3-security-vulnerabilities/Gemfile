@@ -56,3 +56,6 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 # redis store
 gem 'redis'
 gem 'redis-rails'
+
+# active strage
+gem "aws-sdk-s3", require: false

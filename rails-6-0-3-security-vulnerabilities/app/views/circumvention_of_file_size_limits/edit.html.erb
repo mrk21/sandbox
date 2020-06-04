@@ -1,0 +1,15 @@
+<h2>Upload avatar</h2>
+
+<%= form_with url: circumvention_of_file_size_limit_path, model: @record do |f| %>
+  <p>
+    <%= f.label :current_avatar %>
+    <% if @record.avatar.present? %>
+      <%= image_tag @record.avatar %>
+    <% end %>
+  </p>
+  <p>
+    <%= f.label :avatar %>
+    <%= f.file_field :avatar %>
+  </p>
+  <%= f.submit %>
+<% end %>

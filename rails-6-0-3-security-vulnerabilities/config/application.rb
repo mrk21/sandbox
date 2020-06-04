@@ -24,5 +24,8 @@ module Rails603SecurityVulnerabilities
     config.public_file_server.headers = {
       'Cache-Control' => "public, max-age=#{3.minutes.to_i}"
     }
+
+    # active storage
+    config.active_storage.service = :amazon
   end
 end
