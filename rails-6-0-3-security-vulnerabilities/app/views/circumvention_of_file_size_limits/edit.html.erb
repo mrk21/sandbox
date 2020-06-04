@@ -9,7 +9,7 @@
   </p>
   <p>
     <%= f.label :avatar %>
-    <%= f.file_field :avatar %>
+    <%= f.file_field :avatar, direct_upload: true %>
   </p>
   <%= f.submit %>
 <% end %>
