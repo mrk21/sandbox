@@ -27,5 +27,8 @@ module Rails603SecurityVulnerabilities
 
     # active storage
     config.active_storage.service = :amazon
+
+    # per_form_csrf_tokens
+    Rails.application.config.action_controller.per_form_csrf_tokens = true
   end
 end

