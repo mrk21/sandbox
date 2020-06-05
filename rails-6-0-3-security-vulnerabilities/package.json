@@ -2,9 +2,9 @@
   "name": "rails_6_0_3_security_vulnerabilities",
   "private": true,
   "dependencies": {
-    "@rails/actioncable": "^6.0.0",
-    "@rails/activestorage": "^6.0.0",
-    "@rails/ujs": "^6.0.0",
+    "@rails/actioncable": "6.0.3",
+    "@rails/activestorage": "6.0.3",
+    "@rails/ujs": "6.0.3",
     "@rails/webpacker": "4.2.2",
     "crypto-js": "^4.0.0",
     "turbolinks": "^5.2.0"

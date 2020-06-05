@@ -4,4 +4,5 @@ Rails.application.routes.draw do
   resource :unintended_unmarshalling
   resource :circumvention_of_file_size_limit
   resource :ability_to_forge_per_form_csrf_token
+  resource :csrf_vulnerability_in_rails_ujs
 end

@@ -4,6 +4,7 @@
 export DOCKER_HOST_APP_PORT=3000   # You can access to rails server by http://127.0.0.1:${DOCKER_HOST_APP_PORT}
 export DOCKER_HOST_DB_PORT=3306    # You can access to mysql server by tcp://root:@127.0.0.1:${DOCKER_HOST_DB_PORT}
 export DOCKER_HOST_REDIS_PORT=6379 # You can access to redis server by tcp://127.0.0.1:${DOCKER_HOST_REDIS_PORT}
+export DOCKER_HOST_NGINX_PORT=80   # You can access to nginx server by tcp://127.0.0.1:${DOCKER_HOST_NGINX_PORT}
 
 
 #-------------------------------------------------------------------------------

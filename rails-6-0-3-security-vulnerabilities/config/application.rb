@@ -30,5 +30,15 @@ module Rails603SecurityVulnerabilities
 
     # per_form_csrf_tokens
     Rails.application.config.action_controller.per_form_csrf_tokens = true
+
+    # CORS
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins "*"
+        resource "*",
+          headers: :any,
+          methods: [:get, :post, :options, :head]
+      end
+    end
   end
 end
