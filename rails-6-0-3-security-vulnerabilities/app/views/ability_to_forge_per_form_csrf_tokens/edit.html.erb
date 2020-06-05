@@ -20,7 +20,7 @@
 
 <h3>dummy strong_parameters_bypass_path</h3>
 
-<form class="--js-dummy-form" action="/strong_parameters_bypass" accept-charset="UTF-8" data-remote="true" method="post">
+<form class="--js-dummy-form" action="/strong_parameters_bypass" accept-charset="UTF-8" method="post">
   <input type="hidden" name="_method" value="patch">
   <p>
     <label for="user_name">Name</label>
@@ -41,6 +41,14 @@
     return result;
   }
 
+  const hmacSHA256Digest = (key, data) => {
+    const shaObj = new jsSHA("SHA-256", "TEXT", {
+      hmacKey: { value: key, format: "BYTES" },
+    });
+    shaObj.update(data);
+    return shaObj.getHash("BYTES");
+  };
+
   const getOneTimePad = (maskedToken) => {
     return maskedToken.substring(0, AUTHENTICITY_TOKEN_LENGTH);
   };
@@ -52,10 +60,10 @@
   };
 
   const getPerFormCsrfToken = ({ realCsrfToken, actionPath, method }) => {
-    return CryptoJS.HmacSHA256(
+    return hmacSHA256Digest(
+      realCsrfToken,
       [actionPath, method.toLowerCase()].join("#"),
-      realCsrfToken
-    ).toString(CryptoJS.enc.Latin1);
+    );
   };
 
   const getMaskedAuthenticityToken = ({ realCsrfToken, oneTimePad, actionPath, method }) => {
