@@ -60,7 +60,7 @@ services:
       - app
     volumes:
       - .:/app
-      - ./Docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
       - ${DOCKER_HOST_NGINX_PORT:-80}:80
 
