@@ -2,6 +2,7 @@
 
 ## Dependencies
 
+- Unity 2018.4.23f1
 - [CamTwist](http://camtwiststudio.com/)
   - Virtual camera devise
   - Syphon client
