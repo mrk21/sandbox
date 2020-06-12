@@ -1,5 +1,6 @@
 ﻿using Google.Cloud.Speech.V1;
 using System;
+using dotenv.net;
 
 namespace GoogleCloudSamples
 {
@@ -10,6 +11,8 @@ namespace GoogleCloudSamples
         public static void Main(string[] args)
         {
             Console.OutputEncoding = new System.Text.UTF8Encoding();
+            DotEnv.Config(true, "../../../.env");
+
             var speech = SpeechClient.Create();
             var response = speech.Recognize(
                 new RecognitionConfig()

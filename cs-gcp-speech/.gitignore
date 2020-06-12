@@ -359,6 +359,15 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Others
+# Packages
+packages/*
+
+# Credentials
 credentials.json
+
+# Env files
+.envrc.local
+.env
+
+# Temp files
 test.flac
