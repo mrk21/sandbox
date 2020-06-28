@@ -5,34 +5,42 @@ using System.Runtime.InteropServices;
 using System;
 using System.Threading.Tasks;
 using UnityEngine.UI;
+using System.Collections;
+using UniRx;
+using System.Linq;
 
 class AzureRecognizer
 {
-    [DllImport("AzureSpeech")] private static extern IntPtr Recognizer_new(string key, string region, Action<string> logger);
-    [DllImport("AzureSpeech")] private static extern void Recognizer_recognize(IntPtr recognizer, Action<string, string> callback);
+    private delegate void Callback(string v1, string v2);
+    private delegate void Logger(string v);
+
+    [DllImport("AzureSpeech")] private static extern IntPtr Recognizer_new(string key, string region, Logger logger, Callback callback);
+    [DllImport("AzureSpeech")] private static extern void Recognizer_start(IntPtr recognizer);
+    [DllImport("AzureSpeech")] private static extern void Recognizer_stop(IntPtr recognizer);
     [DllImport("AzureSpeech")] private static extern void Recognizer_delete(IntPtr recognizer);
     private IntPtr recognizer;
-    private Boolean isRunning;
+    private Logger logger;
+    private Callback callback;
+    public ReactiveProperty<(string, string)> OnUpdate = new ReactiveProperty<(string, string)>();
 
-    public AzureRecognizer()
+    public AzureRecognizer(string key, string region)
     {
-        var key = Environment.GetEnvironmentVariable("AZURE_SBSCRIPTION_KEY");
-        var region = Environment.GetEnvironmentVariable("AZURE_REGION");
-        recognizer = Recognizer_new(key, region, (msg) => { Debug.Log(msg); });
+        logger = (v) => { Debug.Log(v); };
+        callback = (v1, v2) => { OnUpdate.Value = (v1, v2); };
+        recognizer = Recognizer_new(key, region, logger, callback);
     }
 
-    public void Start(Action<string, string> callback)
+    public void Start()
     {
-        isRunning = true;
         Task.Run(() =>
         {
-            while (isRunning) Recognizer_recognize(recognizer, callback);
+            Recognizer_start(recognizer);
         });
     }
 
     public void Stop()
     {
-        isRunning = false;
+        Recognizer_stop(recognizer);
     }
 
     ~AzureRecognizer()
@@ -50,26 +58,49 @@ public class SpeechBehaviour : MonoBehaviour
     [SerializeField] private Text recognizedText = null;
     [SerializeField] private Text translatedText = null;
 
-    private string recognizedText_ = "";
-    private string translatedText_ = "";
-
-    void Start()
+    IEnumerator Start()
     {
         DotEnv.AutoConfig();
         
-        client = SpeechClient.Create();
-        recognizer = new AzureRecognizer();
-        recognizer.Start((recognizedText, translatedText) => {
-            Debug.Log("#################");
-            this.recognizedText_ = recognizedText;
-            this.translatedText_ = translatedText;
-        });
+        yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
+        if (Application.HasUserAuthorization(UserAuthorization.Microphone))
+        {
+            Debug.Log("Microphone found");
+        }
+        else
+        {
+            Debug.Log("Microphone not found");
+        }
+
+        InitGCPRecognizer();
+        InitAzureRecognizer();
     }
 
-    void Update()
+    void InitGCPRecognizer()
     {
-        recognizedText.text = recognizedText_;
-        translatedText.text = translatedText_;
+        client = SpeechClient.Create();
+    }
+
+    void InitAzureRecognizer()
+    {
+        recognizer = new AzureRecognizer(
+            Environment.GetEnvironmentVariable("AZURE_SBSCRIPTION_KEY"),
+            Environment.GetEnvironmentVariable("AZURE_REGION")
+        );
+
+        recognizer.OnUpdate
+            .Subscribe((v) => { Debug.Log(v.Item1 + " -> " + v.Item2); })
+            .AddTo(gameObject);
+
+        recognizer.OnUpdate
+            .BatchFrame(0, FrameCountType.Update)
+            .Subscribe((v) => {
+                recognizedText.text = v.Last().Item1;
+                translatedText.text = v.Last().Item2;
+            })
+            .AddTo(gameObject);
+
+        recognizer.Start();
     }
 
     void OnDestroy()

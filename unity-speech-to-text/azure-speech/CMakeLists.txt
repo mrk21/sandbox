@@ -6,6 +6,7 @@ project(cpp-azure-speech-to-text)
 # options
 # -----------------------------------------------------------------------------
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/../Assets/Plugins)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 # -----------------------------------------------------------------------------

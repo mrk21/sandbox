@@ -21,7 +21,7 @@ rm -rf vendor/MicrosoftCognitiveServicesSpeech.framework.zip
 mkdir build
 cd build
 cmake .. -G Xcode
-cmake --build . --config Release
+cmake --build .
 cmake --install .
 ```
 

@@ -344,9 +344,9 @@ PlayerSettings:
   enableInternalProfiler: 0
   logObjCUncaughtExceptions: 1
   enableCrashReportAPI: 0
-  cameraUsageDescription: 
+  cameraUsageDescription: for Capture your face
   locationUsageDescription: 
-  microphoneUsageDescription: 
+  microphoneUsageDescription: for Capture your voice
   switchNetLibKey: 
   switchSocketMemoryPoolSize: 6144
   switchSocketAllocatorPoolSize: 128
