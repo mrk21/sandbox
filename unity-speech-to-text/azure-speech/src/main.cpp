@@ -4,8 +4,9 @@
 #include <functional>
 #include <csignal>
 
-azure_speech::Recognizer * recognizer = nullptr;
-bool is_stopping = false;
+namespace {
+    azure_speech::Recognizer * recognizer = nullptr;
+}
 
 int main() {
     ::recognizer = new azure_speech::Recognizer(
@@ -16,14 +17,11 @@ int main() {
     );
     std::thread t([] { ::recognizer->start(); });
     std::signal(SIGINT, [](int){
-        if (::is_stopping) return;
-        ::is_stopping = true;
         std::cout << std::endl;
         ::recognizer->stop();
-        delete ::recognizer;
-        ::recognizer = nullptr;
-        std::exit(0);
     });
     t.join();
+    delete ::recognizer;
+    ::recognizer = nullptr;
     return 0;
 }

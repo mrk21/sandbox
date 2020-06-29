@@ -139,7 +139,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &28063635
 RectTransform:
   m_ObjectHideFlags: 0
@@ -336,7 +336,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &241059068
 RectTransform:
   m_ObjectHideFlags: 0
@@ -981,6 +981,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   recognizedText: {fileID: 427788138}
   translatedText: {fileID: 2135714723}
+  gcpRecognitionButton: {fileID: 241059070}
+  azureRecognitionButton: {fileID: 28063636}
 --- !u!1 &1267969698
 GameObject:
   m_ObjectHideFlags: 0

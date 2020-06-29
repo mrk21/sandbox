@@ -12,10 +12,9 @@ namespace azure_speech {
     ) :
         logger(logger_),
         callback(callback_),
-        is_running(false)
+        is_running(false),
+        is_stopped(true)
     {
-        this->log(key);
-        this->log(region);
         auto config = Translation::SpeechTranslationConfig::FromSubscription(key, region);
         config->SetSpeechRecognitionLanguage("ja-JP");
         config->AddTargetLanguage("en");
@@ -32,6 +31,7 @@ namespace azure_speech {
     void Recognizer::start() {
         this->log("start");
         this->is_running = true;
+        this->is_stopped = false;
 
         this->recognizer->Recognizing.Connect([this](const auto & e) {
             auto result = e.Result;
@@ -81,8 +81,8 @@ namespace azure_speech {
         this->recognizer->StartContinuousRecognitionAsync().wait();
         while (this->is_running) std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        try { this->recognizer->StopContinuousRecognitionAsync().wait(); }
-        catch (const std::bad_weak_ptr & e) { /* ignore */ }
+        this->recognizer->StopContinuousRecognitionAsync().wait();
+        this->is_stopped = true;
         this->log("stopped");
     }
 
@@ -90,6 +90,7 @@ namespace azure_speech {
         if (!this->is_running) return;
         this->log("stopping...");
         this->is_running = false;
+        while (!this->is_stopped) std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     void Recognizer::log(const std::string & v) const {

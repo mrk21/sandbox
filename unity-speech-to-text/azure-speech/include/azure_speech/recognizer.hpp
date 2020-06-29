@@ -12,6 +12,7 @@ namespace azure_speech {
         Logger logger;
         Callback callback;
         bool is_running;
+        bool is_stopped;
 
     public:
         Recognizer(const char * key, const char * region, Logger logger_, Callback callback_);

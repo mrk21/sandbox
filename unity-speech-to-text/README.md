@@ -37,10 +37,12 @@ for f in $(find Assets/Plugins/x86/*.x86.*); do; mv -f $f Assets/Plugins/x86/$(e
 for f in $(find Assets/Plugins/x86_64/*.x64.*); do; mv -f $f Assets/Plugins/x86_64/$(echo $f | sed 's/\.x64//' | xargs basename); done
 
 # 5. Put credentials
-cp /path/to/gcp_credentials.json credentials.json
+cp /path/to/gcp_credentials.json Assets/StreamingAssets/credentials.json
 
 # 6. Generate test audio file
-say -v Kyoko "日本語の音声認識、できるかな" -o test.flac
+say -v Kyoko "日本語の音声認識、できるかな" -o Assets/StreamingAssets/test.flac
+
+# 7. Build native plugin
 ```
 
 ## Refer to

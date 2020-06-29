@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using Google.Cloud.Speech.V1;
 using dotenv.net;
 using System.Runtime.InteropServices;
 using System;
@@ -8,6 +7,7 @@ using UnityEngine.UI;
 using System.Collections;
 using UniRx;
 using System.Linq;
+using Google.Cloud.Speech.V1;
 
 class AzureRecognizer
 {
@@ -18,20 +18,26 @@ class AzureRecognizer
     [DllImport("AzureSpeech")] private static extern void Recognizer_start(IntPtr recognizer);
     [DllImport("AzureSpeech")] private static extern void Recognizer_stop(IntPtr recognizer);
     [DllImport("AzureSpeech")] private static extern void Recognizer_delete(IntPtr recognizer);
+
     private IntPtr recognizer;
-    private Logger logger;
-    private Callback callback;
+    private readonly Logger logger;
+    private readonly Callback callback;
+    private readonly string key;
+    private readonly string region;
+
     public ReactiveProperty<(string, string)> OnUpdate = new ReactiveProperty<(string, string)>();
 
-    public AzureRecognizer(string key, string region)
+    public AzureRecognizer(string key_, string region_)
     {
         logger = (v) => { Debug.Log(v); };
         callback = (v1, v2) => { OnUpdate.Value = (v1, v2); };
-        recognizer = Recognizer_new(key, region, logger, callback);
+        key = key_;
+        region = region_;
     }
 
     public void Start()
     {
+        recognizer = Recognizer_new(key, region, logger, callback);
         Task.Run(() =>
         {
             Recognizer_start(recognizer);
@@ -41,27 +47,25 @@ class AzureRecognizer
     public void Stop()
     {
         Recognizer_stop(recognizer);
-    }
-
-    ~AzureRecognizer()
-    {
         Recognizer_delete(recognizer);
     }
 }
 
 public class SpeechBehaviour : MonoBehaviour
 {
-    private static readonly string DEMO_FILE = "test.flac";
     private SpeechClient client;
     private AzureRecognizer recognizer;
 
     [SerializeField] private Text recognizedText = null;
     [SerializeField] private Text translatedText = null;
+    [SerializeField] private Button gcpRecognitionButton = null;
+    [SerializeField] private Button azureRecognitionButton = null;
 
     IEnumerator Start()
     {
-        DotEnv.AutoConfig();
-        
+        DotEnv.Config(true, Application.streamingAssetsPath + "/env");
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", Application.streamingAssetsPath + "/credentials.json");
+
         yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
         if (Application.HasUserAuthorization(UserAuthorization.Microphone))
         {
@@ -72,13 +76,17 @@ public class SpeechBehaviour : MonoBehaviour
             Debug.Log("Microphone not found");
         }
 
-        InitGCPRecognizer();
+        //InitGCPRecognizer();
         InitAzureRecognizer();
     }
 
     void InitGCPRecognizer()
     {
         client = SpeechClient.Create();
+
+        gcpRecognitionButton.OnClickAsObservable()
+            .Subscribe(_ => { OnClickGCPRecognitionButton(); })
+            .AddTo(gameObject);
     }
 
     void InitAzureRecognizer()
@@ -106,9 +114,11 @@ public class SpeechBehaviour : MonoBehaviour
     void OnDestroy()
     {
         recognizer.Stop();
+        recognizer = null;
+        client = null;
     }
 
-    public void OnClickButton()
+    public void OnClickGCPRecognitionButton()
     {
         var response = client.Recognize(
             new RecognitionConfig()
@@ -117,7 +127,7 @@ public class SpeechBehaviour : MonoBehaviour
                 SampleRateHertz = 22050,
                 LanguageCode = LanguageCodes.Japanese.Japan,
             },
-            RecognitionAudio.FromFile(DEMO_FILE)
+            RecognitionAudio.FromFile(Application.streamingAssetsPath + "/test.flac")
         );
         Debug.Log(response);
     }

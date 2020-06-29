@@ -7,7 +7,7 @@ if (APPLE)
   set_target_properties(AzureSpeech PROPERTIES BUNDLE TRUE)
 
   install(
-    DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Debug/AzureSpeech.bundle"
+    DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Release/AzureSpeech.bundle"
     DESTINATION x86_64
   )
 else()
