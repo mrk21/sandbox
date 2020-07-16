@@ -1,0 +1,19 @@
+---
+version: '3.7'
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: docker/proxy/Dockerfile
+    init: true
+    command: go run proxy.go
+    volumes:
+      - .:/app
+    ports:
+      - ${DOCKER_HOST_PROXY_PORT}:8080
+
+  nginx:
+    image: nginx
+    init: true
+    ports:
+      - ${DOCKER_HOST_WEB_PORT}:80
