@@ -17,3 +17,10 @@ services:
     init: true
     ports:
       - ${DOCKER_HOST_WEB_PORT}:80
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/client/Dockerfile
+    init: true
+    command: bash -c 'while :; do echo wait; sleep 60; done'

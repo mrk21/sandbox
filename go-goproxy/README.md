@@ -26,9 +26,25 @@ docker-compose up
 ## Usage
 
 ```sh
-curl --proxy http://localhost:${DOCKER_HOST_PROXY_PORT} https://www.google.co.jp # OK
-curl --proxy http://localhost:${DOCKER_HOST_PROXY_PORT} http://abehiroshi.la.coocan.jp # OK
-curl --proxy http://localhost:${DOCKER_HOST_PROXY_PORT} http://nginx # Deny access
+# Allow access
+docker-compose exec client curl --proxy http://proxy:8080 https://www.google.co.jp
+
+# Allow access
+docker-compose exec client curl --proxy http://proxy:8080 http://abehiroshi.la.coocan.jp
+
+# Deny access
+docker-compose exec client curl --proxy http://proxy:8080 http://nginx
+```
+
+```sh
+# Deny access
+curl --proxy http://localhost:${DOCKER_HOST_PROXY_PORT} https://www.google.co.jp
+
+# Deny access
+curl --proxy http://localhost:${DOCKER_HOST_PROXY_PORT} http://abehiroshi.la.coocan.jp
+
+# Deny access
+curl --proxy http://localhost:${DOCKER_HOST_PROXY_PORT} http://nginx
 ```
 
 ## Refer to
