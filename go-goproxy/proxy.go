@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"net/url"
+	"os"
 	"strings"
 
 	"github.com/elazarl/goproxy"
@@ -39,6 +40,8 @@ var denyDestCIDRs = []*net.IPNet{
 
 var allowSrcIPs = []net.IP{
 	ResolveIP("client"), // IP of `client` docker container
+	ResolveIP("proxy"),  // IP of `proxy` docker container
+	ResolveIP("proxy2"), // IP of `proxy2` docker container
 }
 
 func IsAllowedDestIP(ip net.IP) bool {
@@ -66,7 +69,7 @@ func main() {
 			log.Fatal(err)
 			return true
 		}
-		fmt.Println("## Src IP:", srcAddr.IP)
+		log.Println("## Src IP:", srcAddr.IP)
 
 		dest := req.Host
 		if !strings.Contains(dest, ":") {
@@ -77,7 +80,7 @@ func main() {
 			log.Fatal(err)
 			return true
 		}
-		fmt.Println("## Dest IP:", destAddr.IP)
+		log.Println("## Dest IP:", destAddr.IP)
 
 		return !IsAllowedSrcIP(srcAddr.IP) || !IsAllowedDestIP(destAddr.IP)
 	}
@@ -95,6 +98,29 @@ func main() {
 
 	proxy := goproxy.NewProxyHttpServer()
 	proxy.Verbose = true
+
+	proxy.Tr.Proxy = func(req *http.Request) (*url.URL, error) {
+		log.Println("### Host:", req.Host)
+
+		if os.Getenv("SECONDARY") != "1" && req.Host == "abehiroshi.la.coocan.jp" {
+			return url.Parse("http://proxy2:8080")
+		} else {
+			return nil, nil
+		}
+	}
+
+	// @see [How to chain HTTPS proxy · Issue #230 · elazarl/goproxy](https://github.com/elazarl/goproxy/issues/230)
+	connectProxy := proxy.NewConnectDialToProxy("http://proxy2:8080")
+	proxy.ConnectDial = func(network string, addr string) (net.Conn, error) {
+		log.Println("### Host:", addr)
+
+		if os.Getenv("SECONDARY") != "1" && addr == "www.google.co.jp:443" {
+			return connectProxy(network, addr)
+		} else {
+			return net.Dial(network, addr)
+		}
+	}
+
 	proxy.OnRequest(rejectCondition).DoFunc(alwaysReject)
 	proxy.OnRequest(rejectCondition).HandleConnect(goproxy.AlwaysReject)
 
