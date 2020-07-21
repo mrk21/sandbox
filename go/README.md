@@ -7,7 +7,7 @@
 ## Setup
 
 ```sh
-go run hello.go
+go run cmd/hello/main.go
 ```
 
 ## Refer to
