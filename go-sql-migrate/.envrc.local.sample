@@ -1,0 +1,15 @@
+#-------------------------------------------------------------------------------
+# Docker
+#-------------------------------------------------------------------------------
+export DOCKER_HOST_DB_PORT=3306 # You can access to db by tcp://127.0.0.1:${DOCKER_HOST_DB_PORT}
+
+
+#-------------------------------------------------------------------------------
+# DB
+#-------------------------------------------------------------------------------
+export DB_HOST=127.0.0.1
+export DB_PORT=${DOCKER_HOST_DB_PORT}
+export DB_USER=root
+export DB_PASS=
+export DB_NAME=go-sql-migrate_development
+export DB_USERPASS=${DB_USER} # or ${DB_USER}:${DB_PASS}
