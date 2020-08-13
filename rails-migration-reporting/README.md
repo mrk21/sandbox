@@ -23,12 +23,13 @@
 - Docker: >= 18.06
 - docker-compose: >= 1.25.0
 - direnv
+- circleci cli
 
 ## Setup
 
 ```sh
 #------------------------------------------------------------------------------
-# 1. Install `docker`, `docker-compose`, `direnv`
+# 1. Install `docker`, `docker-compose`, `direnv`, `circleci`
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
@@ -47,10 +48,20 @@ docker-compose up
 ## Usage
 
 ```sh
-# Report migration on `git push`
+# Report migration based on `git diff` command
 docker-compose exec app rails r script/migration_diff # notify
 
-# Report migration on `rails db:migrate`
+# Report migration based on hooking `db:migrate` rake task
 docker-compose run app rails db:migrate # migration and notify
 tree tmp/migration_reporter # report result
+```
+
+## CI
+
+### Local execution
+
+```sh
+cd root-dir
+ln -s rails-migration-reporting/.circleci .
+rails-migration-reporting/.bin/circleci-build
 ```

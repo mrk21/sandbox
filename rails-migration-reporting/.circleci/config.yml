@@ -1,0 +1,52 @@
+version: 2
+jobs:
+  # Use the following CicleCI environment variables:
+  # * RAILS_MIGRATION_REPORTING__SLACK_WEBHOOK_URL
+  build:
+    docker:
+      - image: circleci/ruby:2.7.1-node
+        environment:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: root
+          DB_PASSWORD: ''
+      - image: mysql:5.7.16
+        environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+    steps:
+      - checkout
+      - run:
+          name: Set environment
+          command: echo "export SLACK_WEBHOOK_URL=${RAILS_MIGRATION_REPORTING__SLACK_WEBHOOK_URL}" >> ${BASH_ENV}
+      - restore_cache:
+          key: sandbox-rails-migration-reporting-{{ checksum "Gemfile.lock" }}
+          working_directory: rails-migration-reporting
+      - run:
+          name: bundle install
+          command: bundle install --path vendor/bundle
+          working_directory: rails-migration-reporting
+      - save_cache:
+          key: sandbox-rails-migration-reporting-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+          working_directory: rails-migration-reporting
+      - run:
+          name: Init DB
+          command: >
+            dockerize -wait tcp://${DB_HOST}:3306 -timeout 1m &&
+            bundle exec rake db:create
+          working_directory: rails-migration-reporting
+      - run:
+          name: Report migration (based on `git diff`)
+          command: bundle exec rails r script/migration_diff
+          working_directory: rails-migration-reporting
+      - run:
+          name: Report migration (based on hooking `db:migrate` rake task)
+          command: bundle exec rails db:migrate
+          working_directory: rails-migration-reporting
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
