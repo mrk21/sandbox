@@ -11,8 +11,8 @@ base: &base
 
 development:
   <<: *base
-  database: rails_migration_hook_development
+  database: rails_migration_reporting_development
 
 test:
   <<: *base
-  database: rails_migration_hook_test
+  database: rails_migration_reporting_test

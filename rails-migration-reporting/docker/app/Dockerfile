@@ -51,7 +51,7 @@ RUN echo "dash dash/sh boolean false" | debconf-set-selections && \
     dpkg-reconfigure dash
 
 # Set shell environments
-ENV APP_HOME /app/rails-migration-hook
+ENV APP_HOME /app/rails-migration-reporting
 ENV SHELL /bin/bash
 ENV EDITOR vim
 ENV PATH $APP_HOME/bin:$PATH

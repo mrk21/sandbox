@@ -1,4 +1,4 @@
-# rails migration hook
+# rails migration reporting
 
 ## Dependencies
 

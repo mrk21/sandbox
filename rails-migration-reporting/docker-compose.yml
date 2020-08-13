@@ -26,9 +26,9 @@ services:
       - db
     volumes:
       - ..:/app
-      - cache:/app/rails-migration-hook/tmp/cache
+      - cache:/app/rails-migration-reporting/tmp/cache
       - bundle:/usr/local/bundle
-      - node_modules:/app/rails-migration-hook/node_modules
+      - node_modules:/app/rails-migration-reporting/node_modules
     ports:
       - ${DOCKER_HOST_APP_PORT:-3000}:3000
     environment:
