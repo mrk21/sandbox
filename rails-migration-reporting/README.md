@@ -65,3 +65,11 @@ cd root-dir
 ln -s rails-migration-reporting/.circleci .
 rails-migration-reporting/.bin/circleci-build
 ```
+
+### Remote Execution
+
+```sh
+git checkout ci/rails-migration-reporting
+git merge master
+git push
+```
