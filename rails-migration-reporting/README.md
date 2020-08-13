@@ -71,5 +71,8 @@ rails-migration-reporting/.bin/circleci-build
 ```sh
 git checkout ci/rails-migration-reporting
 git merge master
+cp -rf rails-migration-reporting/.circleci .
+git add .circleci
+git commit -m 'rails-migration-reporting: Update .circleci'
 git push
 ```
