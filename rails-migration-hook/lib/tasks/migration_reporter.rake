@@ -39,42 +39,47 @@ class MigrationReporter
   end
 
   def report
-    io = path.report.open('w')
-
-    io.puts '# Migration Report'
-    io.puts ''
-
-    io.puts '## Before Status'
-    io.puts ''
-    io.puts '```'
-    io.puts status_table(:before)
-    io.puts '```'
-    io.puts ''
-
-    io.puts '## After Status'
-    io.puts ''
-    io.puts '```'
-    io.puts status_table(:after)
-    io.puts '```'
-    io.puts ''
-
-    io.puts '## Applied Migrations'
-    io.puts ''
-    io.puts applied_migrations.map { |v| '* ' + v.filename }.join("\n")
-    io.puts ''
-
-    unless @failure_migrations.empty?
-      io.puts '## Failure Migrations'
+    path.report.open('w') do |io|
+      io.puts '# Migration Report'
       io.puts ''
-      io.puts @failure_migrations.map { |v| '* ' + v.filename }.join("\n")
+
+      io.puts '## Before Status'
       io.puts ''
+      io.puts '```'
+      io.puts status_table(:before)
+      io.puts '```'
+      io.puts ''
+
+      io.puts '## After Status'
+      io.puts ''
+      io.puts '```'
+      io.puts status_table(:after)
+      io.puts '```'
+      io.puts ''
+
+      io.puts '## Applied Migrations'
+      io.puts ''
+      io.puts applied_migrations.map { |v| '* ' + v.filename }.join("\n")
+      io.puts ''
+
+      unless @failure_migrations.empty?
+        io.puts '## Failure Migrations'
+        io.puts ''
+        io.puts @failure_migrations.map { |v| '* ' + v.filename }.join("\n")
+        io.puts ''
+      end
+
+      io.puts '## Schema diff'
+      io.puts ''
+      io.puts '```'
+      io.puts schema_diff
+      io.puts '```'
     end
 
-    io.puts '## Schema diff'
-    io.puts ''
-    io.puts '```ruby'
-    io.puts schema_diff
-    io.puts '```'
+    if ENV['SLACK_WEBHOOK_URL'].present? && schema_diff.present?
+      notifier = Slack::Notifier.new ENV['SLACK_WEBHOOK_URL']
+      notifier.ping path.report.read
+    end
   end
 
   module MigrationContextHook

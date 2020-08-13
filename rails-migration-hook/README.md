@@ -47,6 +47,10 @@ docker-compose up
 ## Usage
 
 ```sh
-docker-compose run app rails db:migrate
-tree tmp/migration_reporter # result
+# Report migration on `git push`
+docker-compose exec app rails r script/migration_diff # notify
+
+# Report migration on `rails db:migrate`
+docker-compose run app rails db:migrate # migration and notify
+tree tmp/migration_reporter # report result
 ```

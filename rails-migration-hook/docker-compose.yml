@@ -25,10 +25,10 @@ services:
     depends_on:
       - db
     volumes:
-      - .:/app
-      - cache:/app/tmp/cache
+      - ..:/app
+      - cache:/app/rails-migration-hook/tmp/cache
       - bundle:/usr/local/bundle
-      - node_modules:/app/node_modules
+      - node_modules:/app/rails-migration-hook/node_modules
     ports:
       - ${DOCKER_HOST_APP_PORT:-3000}:3000
     environment:
@@ -36,6 +36,7 @@ services:
       DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: ''
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL}
 
 volumes:
   db:
