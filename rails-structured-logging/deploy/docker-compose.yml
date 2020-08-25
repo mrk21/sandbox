@@ -8,6 +8,6 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-group: /ecs-test/app
+        awslogs-group: /rails-structured-logging/production/app/main
         awslogs-region: ${AWS_REGION}
         awslogs-stream-prefix: ecs

@@ -13,3 +13,10 @@ export AWS_ACCOUNT_ID=
 export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
 export AWS_DEFAULT_REGION=
+
+#-------------------------------------------------------------------------------
+# Infra
+#-------------------------------------------------------------------------------
+export TERRAFORM_DOCKER_IMAGE=rails-structured-logging-terraform
+export RDS_USER=
+export RDS_PASSWORD=

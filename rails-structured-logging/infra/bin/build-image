@@ -1,0 +1,4 @@
+#!/bin/bash
+ROOT_DIR=$(cd $(dirname $0); pwd -P | xargs dirname)
+
+docker build -t ${TERRAFORM_DOCKER_IMAGE} -f ${ROOT_DIR}/docker/terraform/Dockerfile ${ROOT_DIR}

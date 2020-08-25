@@ -95,6 +95,18 @@ module Logging
     #   exception: [string, string] | null;
     #   exception_backtrace: string[] | null;
     # };
+    # type LogrageBaseLog = {
+    #   method: string;
+    #   path: string;
+    #   format: string;
+    #   controller: string;
+    #   action: string;
+    #   status: number;
+    #   duration: number;
+    #   view: number;
+    #   db: number;
+    # }
+    # type LogrageLog = LogrageBaseLog & LogrageAppendedLog;
     class LogrageAppendedLog < LogBase
       attr_reader :request_id
       attr_reader :ip
