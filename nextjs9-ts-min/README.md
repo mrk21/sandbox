@@ -1,10 +1,22 @@
 # Next.js 9 + TypeScript minimum structures
 
+## Dependencies
+
+- TypeScript: 4.0
+- Next.js: 9.5
+
+## Setup
+
+```sh
+yarn install
+yarn dev
+```
+
 ## Memo
 
-### Basic structure
+### Referenced structure
 
-```js
+```sh
 npx create-next-app --example with-typescript nextjs9-ts-min
 ```
 
