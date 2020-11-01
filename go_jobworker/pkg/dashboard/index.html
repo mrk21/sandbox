@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <style>
+    .app {
+      position: absolute;
+      top: 100px;
+      bottom: 100px;
+      left: 100px;
+      right: 100px;
+    }
+    .chart {
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dashboard</h1>
+
+  <div id="app" class="app">
+    <chart class="chart" :data="data"></chart>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  <script>
+    Vue.component("chart", {
+      extends: VueChartJs.Bar,
+      props: ["data"],
+      mounted() {
+        this.render();
+      },
+      methods: {
+        render() {
+          this.renderChart({
+            labels: Array.from(this.data.keys()),
+            datasets: [
+              {
+                type: 'line',
+                label: 'Queue size',
+                yAxisID: "y-axis-1",
+                data: this.data.map(d => d.queSize),
+                backgroundColor: "rgba(0,255,0,0.4)",
+                borderColor: "grean",
+                borderWidth: 2,
+              },
+              {
+                type: 'bar',
+                label: 'Execution jobs [exec/sec]',
+                yAxisID: "y-axis-2",
+                data: this.data.map(d => d.execRate),
+                backgroundColor: "rgba(0,0,255,0.4)",
+                borderColor: "blue",
+                borderWidth: 2,
+              },
+            ],
+          },{
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+              duration: 0,
+            },
+            scales: {
+              yAxes: [
+                {
+                  id: "y-axis-1",
+                  type: "linear",
+                  position: "left",
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'Queue size',
+                  },
+                  ticks: {
+                    min: 0,
+                  },
+                },
+                {
+                  id: "y-axis-2",
+                  type: "linear",
+                  position: "right",
+                  scaleLabel: {
+                    display: true,
+                    labelString: 'Execution jobs [exec/sec]',
+                  },
+                  ticks: {
+                    min: 0,
+                  },
+                }
+              ],
+            }
+          })
+        },
+      },
+      watch: {
+        data() {
+          this.$data._chart.destroy();
+          this.render();
+        }
+      }
+    });
+
+    var vm = new Vue({
+      el: '#app',
+      data() {
+        return {
+          intervalId: null,
+          data: [],
+        };
+      },
+      mounted() {
+        this.fetchData();
+        this.intervalId = setInterval(this.fetchData, 3000);
+      },
+      methods: {
+        async fetchData() {
+          const res = await fetch('/api');
+          const json = await res.json();
+          this.data = json.reverse();
+        },
+      }
+    })
+  </script>
+</body>
+</html>

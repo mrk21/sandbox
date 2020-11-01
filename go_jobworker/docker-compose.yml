@@ -1,0 +1,34 @@
+---
+version: '3.7'
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: docker/worker/Dockerfile
+      target: development
+    init: true
+    command:
+      codep
+        "1=go run cmd/jobworker/main.go"
+        "2=go run cmd/dashboard/main.go"
+    volumes:
+      - .:/app
+    ports:
+      - 5000:5000
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASS:
+
+  redis:
+    image: redis:5.0
+    init: true
+    ports:
+      - 6379
+    command: redis-server --appendonly yes
+    volumes:
+      - redis:/data
+
+volumes:
+  redis:
+    driver: local
