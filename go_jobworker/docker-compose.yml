@@ -7,6 +7,8 @@ services:
       dockerfile: docker/worker/Dockerfile
       target: development
     init: true
+    depends_on:
+      - redis
     command:
       codep
         "1=go run cmd/jobworker/main.go"
@@ -15,6 +17,8 @@ services:
       - .:/app
     ports:
       - 5000:5000
+      - 6060:6060
+      - 8080:8080
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379

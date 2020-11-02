@@ -23,7 +23,7 @@ func New(rclient *redis.Client, port string) *Dashboard {
 		srv:     httpsrv.New(":" + port),
 	}
 	d.srv.AddRoute("GET", "/", d.html)
-	d.srv.AddRoute("GET", "/api", d.api)
+	d.srv.AddRoute("GET", "/data", d.data)
 	d.srv.BuildHandlers()
 	return d
 }
@@ -44,7 +44,7 @@ func (d *Dashboard) html(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (d *Dashboard) api(w http.ResponseWriter, req *http.Request) {
+func (d *Dashboard) data(w http.ResponseWriter, req *http.Request) {
 	data := counter.New(d.rclient, jobque.New(d.rclient), 1)
 	data_, _ := data.Report()
 	json, _ := json.Marshal(data_)

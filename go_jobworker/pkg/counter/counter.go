@@ -24,7 +24,7 @@ func New(rclient *redis.Client, que *jobque.JobQueue, interval time.Duration) *C
 		rclient:       rclient,
 		que:           que,
 		interval:      interval,
-		limit:         1000,
+		limit:         5000,
 		limitDuration: time.Second * 1,
 	}
 }

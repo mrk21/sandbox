@@ -16,9 +16,10 @@ func main() {
 	rclient = redis.NewClient(&redis.Options{
 		Addr:     host + ":" + port,
 		Password: pass,
+		PoolSize: 100,
 	})
 	que := jobque.New(rclient)
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 100000; i++ {
 		err := que.Enqueue(jobque.Item{Url: "https://localhost.local/foo/bar"})
 		if err != nil {
 			log.Panic(err)

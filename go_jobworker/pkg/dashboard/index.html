@@ -117,7 +117,7 @@
       },
       methods: {
         async fetchData() {
-          const res = await fetch('/api');
+          const res = await fetch('/data');
           const json = await res.json();
           this.data = json.reverse();
         },

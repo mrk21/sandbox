@@ -37,6 +37,12 @@ RUN echo "dash dash/sh boolean false" | debconf-set-selections && \
 # Install REPL for Golang
 RUN go get -u github.com/motemen/gore/cmd/gore
 
+# Install FrameGraph
+# @see https://github.com/uber-archive/go-torch
+RUN go get github.com/uber/go-torch
+RUN cd / && git clone https://github.com/brendangregg/FlameGraph.git
+ENV PATH /FlameGraph:$PATH
+
 # Set shell environments
 ENV APP_HOME /app
 ENV SHELL /bin/bash
