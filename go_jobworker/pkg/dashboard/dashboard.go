@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/go-redis/redis"
-	"github.com/mrk21/sandbox/go_jobworker/pkg/counter"
 	"github.com/mrk21/sandbox/go_jobworker/pkg/httpsrv"
 	"github.com/mrk21/sandbox/go_jobworker/pkg/jobque"
+	"github.com/mrk21/sandbox/go_jobworker/pkg/reporter"
 )
 
 type Dashboard struct {
@@ -45,7 +45,7 @@ func (d *Dashboard) html(w http.ResponseWriter, req *http.Request) {
 }
 
 func (d *Dashboard) data(w http.ResponseWriter, req *http.Request) {
-	data := counter.New(d.rclient, jobque.New(d.rclient), 1)
+	data, _ := reporter.New(d.rclient, jobque.New(d.rclient), 1)
 	data_, _ := data.Report()
 	json, _ := json.Marshal(data_)
 	w.WriteHeader(http.StatusOK)

@@ -1,32 +1,47 @@
 package worker
 
 import (
-	"errors"
 	"log"
-	"math/rand"
 	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/mrk21/sandbox/go_jobworker/pkg/counter"
+	"github.com/mrk21/sandbox/go_jobworker/pkg/job"
 	"github.com/mrk21/sandbox/go_jobworker/pkg/jobque"
+	"github.com/mrk21/sandbox/go_jobworker/pkg/reporter"
 )
 
 type Worker struct {
-	rclient *redis.Client
-	que     *jobque.JobQueue
-	counter *counter.Counter
+	rclient  *redis.Client
+	que      *jobque.JobQueue
+	counter  *counter.Counter
+	reporter *reporter.Reporter
+	job      job.Job
 }
 
-func New(rclient *redis.Client) *Worker {
+func New(rclient *redis.Client, job job.Job) (*Worker, error) {
 	q := jobque.New(rclient)
-	c := counter.New(rclient, q, 5)
-	w := &Worker{que: q, counter: c}
-	return w
+	c, err := counter.New(rclient, q, 500, time.Second)
+	if err != nil {
+		return nil, err
+	}
+	r, err := reporter.New(rclient, q, time.Second*5)
+	if err != nil {
+		return nil, err
+	}
+	w := &Worker{
+		rclient:  rclient,
+		que:      q,
+		counter:  c,
+		reporter: r,
+		job:      job,
+	}
+	return w, nil
 }
 
 func (w *Worker) Run() error {
-	go w.counter.ReportLoop()
 	go w.counter.ResetLoop()
+	go w.reporter.RecordLoop()
 
 	for {
 		if w.counter.IsReached() {
@@ -45,11 +60,11 @@ func (w *Worker) Run() error {
 		}
 
 		for _, item := range items {
-			reached, err := w.counter.Call(func() { go w.execute(item) })
+			ok, err := w.counter.Call(func() { go w.execute(item) })
 			if err != nil {
 				return err
 			}
-			if reached {
+			if !ok {
 				w.que.Enqueue(*item)
 			}
 		}
@@ -64,20 +79,9 @@ func (w *Worker) execute(item *jobque.Item) {
 		}
 	}()
 
-	err := testJob(item)
+	err := w.job.Perform(item)
 	if err != nil {
 		log.Println("job failed", item, err)
 		return
 	}
-}
-
-func testJob(item *jobque.Item) error {
-	rand.Seed(time.Now().UnixNano())
-	value := rand.Intn(10000)
-	if value < 5 {
-		panic("fatal")
-	} else if value < 10 {
-		return errors.New("error")
-	}
-	return nil
 }

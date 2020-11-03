@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/go-redis/redis"
+	"github.com/mrk21/sandbox/go_jobworker/pkg/job"
 	"github.com/mrk21/sandbox/go_jobworker/pkg/worker"
 
 	"net/http"
@@ -22,10 +23,20 @@ func main() {
 	rclient = redis.NewClient(&redis.Options{
 		Addr:     host + ":" + port,
 		Password: pass,
+		DB:       0,
 		PoolSize: 100,
 	})
-	w := worker.New(rclient)
-	err := w.Run()
+	testJob := job.NewTestJob(&redis.Options{
+		Addr:     host + ":" + port,
+		Password: pass,
+		DB:       1,
+		PoolSize: 100,
+	})
+	w, err := worker.New(rclient, testJob)
+	if err != nil {
+		log.Panic(err)
+	}
+	err = w.Run()
 	if err != nil {
 		log.Panic(err)
 	}

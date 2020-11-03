@@ -2,7 +2,7 @@
 
 ## Dependencies
 
-* Go: 1.14.x
+- Go: 1.14.x
 - Docker: >= 18.06
 - docker-compose: >= 1.25.0
 

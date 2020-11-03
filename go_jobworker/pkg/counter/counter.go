@@ -1,32 +1,39 @@
 package counter
 
 import (
-	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net"
-	"strconv"
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/google/uuid"
 	"github.com/mrk21/sandbox/go_jobworker/pkg/jobque"
+	"github.com/mrk21/sandbox/go_jobworker/pkg/redislua"
 )
 
 type Counter struct {
 	rclient       *redis.Client
 	que           *jobque.JobQueue
-	interval      time.Duration
 	limit         int
 	limitDuration time.Duration
+	id            string
 }
 
-func New(rclient *redis.Client, que *jobque.JobQueue, interval time.Duration) *Counter {
-	return &Counter{
+func New(rclient *redis.Client, que *jobque.JobQueue, limit int, limitDuration time.Duration) (*Counter, error) {
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+	c := &Counter{
 		rclient:       rclient,
 		que:           que,
-		interval:      interval,
-		limit:         5000,
-		limitDuration: time.Second * 1,
+		limit:         limit,
+		limitDuration: limitDuration,
+		id:            uuid.String(),
 	}
+	return c, nil
 }
 
 func (c *Counter) WaitUnlock() (ret error) {
@@ -34,8 +41,8 @@ func (c *Counter) WaitUnlock() (ret error) {
 	if err != nil {
 		return err
 	}
-
-	pubsub := c.rclient.PSubscribe("__keyspace@0__:jobworker:lock")
+	ch := fmt.Sprintf("__keyspace@%d__:jobworker:lock", c.rclient.Options().DB)
+	pubsub := c.rclient.PSubscribe(ch)
 	defer pubsub.Close()
 
 	for {
@@ -58,81 +65,43 @@ func (c *Counter) WaitUnlock() (ret error) {
 	}
 }
 
-type ReportData struct {
-	ExecRate float64 `json:"execRate"`
-	QueSize  int     `json:"queSize"`
-}
-
-func (c *Counter) Report() ([]ReportData, error) {
-	data, err := c.rclient.LRange("jobworker:report:data", 0, 49).Result()
-	if err == redis.Nil {
-		return []ReportData{}, nil
-	} else if err != nil {
-		return []ReportData{}, err
-	}
-	result := []ReportData{}
-	for _, d := range data {
-		item := ReportData{}
-		json.Unmarshal([]byte(d), &item)
-		result = append(result, item)
-	}
-	return result, nil
-}
-
-func (c *Counter) ReportLoop() {
-	for {
-		func() {
-			data, err := c.rclient.GetSet("jobworker:report:count", 0).Result()
-			if err == redis.Nil {
-				return
-			} else if err != nil {
-				log.Print(err)
-				return
-			}
-			count, err := strconv.Atoi(data)
-			if err != nil {
-				log.Print(err)
-				return
-			}
-			execRate := float64(count) / float64(c.interval)
-			log.Print("## per seconds:", execRate)
-			queSize, _ := c.que.Size()
-
-			json, _ := json.Marshal(ReportData{ExecRate: execRate, QueSize: int(queSize)})
-			c.rclient.LPush("jobworker:report:data", json)
-			c.rclient.LTrim("jobworker:report:data", 0, 49)
-		}()
-		time.Sleep(time.Second * c.interval)
-	}
-}
-
 func (c *Counter) ResetLoop() {
-	for {
-		func() {
-			_, err := c.rclient.Del("jobworker:lock").Result()
-			if err != nil {
-				log.Print(err)
-				return
-			}
+	lua := redislua.NewScript(`
+		local loop_id_key = KEYS[1]
+		local lock_key = KEYS[2]
+		local count_key = KEYS[3]
+		local report_count_key = KEYS[4]
 
-			data, err := c.rclient.GetSet("jobworker:count", 0).Result()
-			if err == redis.Nil {
-				return
-			} else if err != nil {
-				log.Print(err)
-				return
-			}
-			count, err := strconv.Atoi(data)
-			if err != nil {
-				log.Print(err)
-				return
-			}
-			_, err = c.rclient.IncrBy("jobworker:report:count", int64(count)).Result()
-			if err != nil {
-				log.Print(err)
-				return
-			}
-		}()
+		local loop_id = ARGV[1]
+		local limit_duration = ARGV[2]
+
+		if redis.call("EXISTS", loop_id_key) > 0 and loop_id ~= redis.call("GET", loop_id_key) then
+			return 0
+		end
+		redis.call("SET", loop_id_key, loop_id, "EX", limit_duration + 5)
+
+		local count = tonumber(redis.call("GETSET", count_key, 0))
+		redis.call("INCRBY", report_count_key, count)
+		redis.call("DEL", lock_key)
+
+		return 1
+	`)
+	keys := []string{
+		"jobworker:reset_loop",
+		"jobworker:lock",
+		"jobworker:count",
+		"jobworker:report:count",
+	}
+	args := []interface{}{
+		c.id,
+		int(c.limitDuration / time.Second),
+	}
+	for {
+		_, err := lua.Exec(c.rclient, keys, args...)
+		if err != nil {
+			log.Print(err)
+			return
+		}
 		time.Sleep(c.limitDuration)
 	}
 }
@@ -146,15 +115,42 @@ func (c *Counter) IsReached() bool {
 	return data != 0
 }
 
+// Calls the callback if the counter value less than the limit
 func (c *Counter) Call(callback func()) (bool, error) {
-	count, err := c.rclient.Incr("jobworker:count").Result()
-	if count >= int64(c.limit) {
-		_, err := c.rclient.Set("jobworker:lock", 1, c.limitDuration).Result()
-		if err != nil {
-			return true, err
-		}
-		return true, nil
+	lua := redislua.NewScript(`
+		local count_key = KEYS[1]
+		local lock_key = KEYS[2]
+		local limit = tonumber(ARGV[1])
+		local limit_duration = tonumber(ARGV[2])
+		local value = tonumber(redis.call("GET", count_key))
+		if value >= limit then
+			redis.call("SET", lock_key, 1, "EX", limit_duration)
+			return 1
+		else
+			redis.call("INCR", count_key)
+			return 0
+		end
+	`)
+	keys := []string{
+		"jobworker:count",
+		"jobworker:lock",
 	}
-	callback()
-	return false, err
+	args := []interface{}{
+		c.limit,
+		int(c.limitDuration / time.Second),
+	}
+	result, err := lua.Exec(c.rclient, keys, args...)
+	if err != nil {
+		return false, err
+	}
+	switch val := result.(type) {
+	case int64:
+		if val == 0 {
+			callback()
+			return true, nil
+		}
+	default:
+		return false, errors.New("invalid type")
+	}
+	return false, nil
 }

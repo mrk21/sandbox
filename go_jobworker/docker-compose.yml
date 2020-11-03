@@ -12,11 +12,15 @@ services:
     command:
       codep
         "1=go run cmd/jobworker/main.go"
-        "2=go run cmd/dashboard/main.go"
+        "2=go run cmd/jobworker/main.go"
+        "3=go run cmd/jobworker/main.go"
+        "4=go run cmd/api/main.go"
+        "5=go run cmd/dashboard/main.go"
     volumes:
       - .:/app
     ports:
       - 5000:5000
+      - 2000:2000
       - 6060:6060
       - 8080:8080
     environment:
