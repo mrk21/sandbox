@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"runtime"
 
 	"github.com/go-redis/redis"
 	"github.com/mrk21/sandbox/go_jobworker/pkg/job"
@@ -32,7 +33,7 @@ func main() {
 		DB:       1,
 		PoolSize: 100,
 	})
-	w, err := worker.New(rclient, testJob)
+	w, err := worker.New(rclient, testJob, 5000, runtime.NumCPU())
 	if err != nil {
 		log.Panic(err)
 	}

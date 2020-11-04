@@ -50,7 +50,7 @@ func (c *Counter) WaitUnlock() (ret error) {
 		if err != nil {
 			switch err.(type) {
 			case *net.OpError: // Timeout
-				log.Print(err)
+				log.Print("Timeout: ", err)
 				return nil
 			default:
 				return err
@@ -65,7 +65,7 @@ func (c *Counter) WaitUnlock() (ret error) {
 	}
 }
 
-func (c *Counter) ResetLoop() {
+func (c *Counter) ResetLoop(errch chan error) {
 	lua := redislua.NewScript(`
 		local loop_id_key = KEYS[1]
 		local lock_key = KEYS[2]
@@ -96,13 +96,18 @@ func (c *Counter) ResetLoop() {
 		c.id,
 		int(c.limitDuration / time.Second),
 	}
+
+	ticker := time.NewTicker(c.limitDuration)
+	defer ticker.Stop()
 	for {
-		_, err := lua.Exec(c.rclient, keys, args...)
-		if err != nil {
-			log.Print(err)
-			return
+		select {
+		case <-ticker.C:
+			_, err := lua.Exec(c.rclient, keys, args...)
+			if err != nil {
+				errch <- err
+				return
+			}
 		}
-		time.Sleep(c.limitDuration)
 	}
 }
 

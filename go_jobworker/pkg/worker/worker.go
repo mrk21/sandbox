@@ -12,16 +12,22 @@ import (
 )
 
 type Worker struct {
-	rclient  *redis.Client
-	que      *jobque.JobQueue
-	counter  *counter.Counter
-	reporter *reporter.Reporter
-	job      job.Job
+	rclient     *redis.Client
+	que         *jobque.JobQueue
+	counter     *counter.Counter
+	reporter    *reporter.Reporter
+	concurrency int
+	job         job.Job
 }
 
-func New(rclient *redis.Client, job job.Job) (*Worker, error) {
+func New(
+	rclient *redis.Client,
+	job job.Job,
+	limit int,
+	concurrency int,
+) (*Worker, error) {
 	q := jobque.New(rclient)
-	c, err := counter.New(rclient, q, 500, time.Second)
+	c, err := counter.New(rclient, q, limit, time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -30,43 +36,68 @@ func New(rclient *redis.Client, job job.Job) (*Worker, error) {
 		return nil, err
 	}
 	w := &Worker{
-		rclient:  rclient,
-		que:      q,
-		counter:  c,
-		reporter: r,
-		job:      job,
+		rclient:     rclient,
+		que:         q,
+		counter:     c,
+		reporter:    r,
+		concurrency: concurrency,
+		job:         job,
 	}
 	return w, nil
 }
 
 func (w *Worker) Run() error {
-	go w.counter.ResetLoop()
-	go w.reporter.RecordLoop()
+	ch := make(chan struct{}, w.concurrency)
+	errch := make(chan error)
 
+	go w.reporter.RecordLoop(errch)
+	go w.counter.ResetLoop(errch)
+
+	for i := 0; i < w.concurrency; i++ {
+		go w.pool(ch, errch)
+		ch <- struct{}{}
+	}
+
+	select {
+	case err := <-errch:
+		return err
+	}
+}
+
+func (w *Worker) pool(ch chan struct{}, errch chan error) {
+	c := 100
 	for {
-		if w.counter.IsReached() {
-			err := w.counter.WaitUnlock()
-			if err != nil {
-				return err
+		select {
+		case <-ch:
+			if w.counter.IsReached() {
+				err := w.counter.WaitUnlock()
+				if err != nil {
+					errch <- err
+					return
+				}
 			}
-		}
 
-		items, err := w.que.Dequeue(100, time.Second*60)
-		if err != nil {
-			return err
-		} else if items == nil {
-			log.Print("no data")
-			continue
-		}
-
-		for _, item := range items {
-			ok, err := w.counter.Call(func() { go w.execute(item) })
+			items, err := w.que.Dequeue(c, time.Second*60)
 			if err != nil {
-				return err
+				errch <- err
+				return
+			} else if items == nil {
+				log.Print("no data")
+				ch <- struct{}{}
+				continue
 			}
-			if !ok {
-				w.que.Enqueue(*item)
+
+			for _, item := range items {
+				ok, err := w.counter.Call(func() { go w.execute(item) })
+				if err != nil {
+					errch <- err
+					return
+				}
+				if !ok {
+					w.que.Enqueue(*item)
+				}
 			}
+			ch <- struct{}{}
 		}
 	}
 }

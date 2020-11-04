@@ -54,7 +54,7 @@ func (r *Reporter) Report() ([]ReportData, error) {
 	return result, nil
 }
 
-func (r *Reporter) RecordLoop() {
+func (r *Reporter) RecordLoop(errch chan error) {
 	lua := redislua.NewScript(`
 		local loop_id_key = KEYS[1]
 		local total_count_key = KEYS[2]
@@ -78,33 +78,46 @@ func (r *Reporter) RecordLoop() {
 		int(r.reportDuration / time.Second),
 	}
 
+	ticker := time.NewTicker(r.reportDuration)
+	defer ticker.Stop()
 	for {
-		result, err := lua.Exec(r.rclient, keys, args...)
-		if err != nil {
-			log.Print(err)
-			return
-		}
-		var totalCount int
-		switch val := result.(type) {
-		case int64:
-			if val == -1 {
-				time.Sleep(r.reportDuration)
-				continue
-			} else {
-				totalCount = int(val)
+		select {
+		case <-ticker.C:
+			result, err := lua.Exec(r.rclient, keys, args...)
+			if err != nil {
+				errch <- err
+				return
 			}
-		default:
-			log.Print(errors.New("invalid type"))
-			return
+			var totalCount int
+			switch val := result.(type) {
+			case int64:
+				if val == -1 {
+					time.Sleep(r.reportDuration)
+					continue
+				} else {
+					totalCount = int(val)
+				}
+			default:
+				errch <- errors.New("invalid type")
+				return
+			}
+
+			execRate := float64(totalCount) / float64(r.reportDuration/time.Second)
+			log.Print("## per seconds:", execRate)
+			queSize, err := r.que.Size()
+			if err != nil {
+				errch <- err
+				return
+			}
+
+			json, err := json.Marshal(ReportData{ExecRate: execRate, QueSize: int(queSize)})
+			if err != nil {
+				errch <- err
+				return
+			}
+
+			r.rclient.LPush("jobworker:report:data", json)
+			r.rclient.LTrim("jobworker:report:data", 0, 49)
 		}
-
-		execRate := float64(totalCount) / float64(r.reportDuration/time.Second)
-		log.Print("## per seconds:", execRate)
-		queSize, _ := r.que.Size()
-
-		json, _ := json.Marshal(ReportData{ExecRate: execRate, QueSize: int(queSize)})
-		r.rclient.LPush("jobworker:report:data", json)
-		r.rclient.LTrim("jobworker:report:data", 0, 49)
-		time.Sleep(r.reportDuration)
 	}
 }
