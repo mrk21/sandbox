@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -57,22 +59,18 @@ func (r *Reporter) Report() ([]ReportData, error) {
 func (r *Reporter) RecordLoop(errch chan error) {
 	lua := redislua.NewScript(`
 		local loop_id_key = KEYS[1]
-		local total_count_key = KEYS[2]
 
 		local loop_id = ARGV[1]
 		local report_duration = ARGV[2]
 
 		if redis.call("EXISTS", loop_id_key) > 0 and loop_id ~= redis.call("GET", loop_id_key) then
-			return -1
+			return 0
 		end
 		redis.call("SET", loop_id_key, loop_id, "EX", report_duration + 5)
 
-		return tonumber(redis.call("GETSET", total_count_key, 0))
+		return 1
 	`)
-	keys := []string{
-		"jobworker:record_loop",
-		"jobworker:report:count",
-	}
+	keys := []string{"jobworker:record_loop"}
 	args := []interface{}{
 		r.id,
 		int(r.reportDuration / time.Second),
@@ -88,18 +86,34 @@ func (r *Reporter) RecordLoop(errch chan error) {
 				errch <- err
 				return
 			}
-			var totalCount int
 			switch val := result.(type) {
 			case int64:
-				if val == -1 {
+				if val == 0 {
 					time.Sleep(r.reportDuration)
 					continue
-				} else {
-					totalCount = int(val)
 				}
 			default:
 				errch <- errors.New("invalid type")
 				return
+			}
+
+			current := time.Now().Unix()
+			from := strconv.Itoa(int(current) - 4)
+			to := strconv.Itoa(int(current))
+			counts, err := r.rclient.ZRangeByScore("jobworker:count_history", redis.ZRangeBy{Min: from, Max: to}).Result()
+			if err != nil {
+				errch <- err
+				return
+			}
+			totalCount := 0
+			for _, data := range counts {
+				item := strings.Split(data, ",")
+				val, err := strconv.Atoi(item[1])
+				if err != nil {
+					errch <- err
+					return
+				}
+				totalCount += val
 			}
 
 			execRate := float64(totalCount) / float64(r.reportDuration/time.Second)

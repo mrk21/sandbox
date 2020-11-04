@@ -33,7 +33,7 @@ func main() {
 		DB:       1,
 		PoolSize: 100,
 	})
-	w, err := worker.New(rclient, testJob, 5000, runtime.NumCPU())
+	w, err := worker.New(rclient, testJob, 3000, runtime.NumCPU())
 	if err != nil {
 		log.Panic(err)
 	}

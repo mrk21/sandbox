@@ -70,10 +70,11 @@ func (c *Counter) ResetLoop(errch chan error) {
 		local loop_id_key = KEYS[1]
 		local lock_key = KEYS[2]
 		local count_key = KEYS[3]
-		local report_count_key = KEYS[4]
+		local count_history_key = KEYS[4]
 
 		local loop_id = ARGV[1]
 		local limit_duration = ARGV[2]
+		local current = tonumber(ARGV[3])
 
 		if redis.call("EXISTS", loop_id_key) > 0 and loop_id ~= redis.call("GET", loop_id_key) then
 			return 0
@@ -81,7 +82,9 @@ func (c *Counter) ResetLoop(errch chan error) {
 		redis.call("SET", loop_id_key, loop_id, "EX", limit_duration + 5)
 
 		local count = tonumber(redis.call("GETSET", count_key, 0))
-		redis.call("INCRBY", report_count_key, count)
+		redis.call("ZADD", count_history_key, current, tostring(current) .. "," .. tostring(count))
+		redis.call("ZREMRANGEBYSCORE", count_history_key, '-inf', current - 60*60)
+
 		redis.call("DEL", lock_key)
 
 		return 1
@@ -90,11 +93,7 @@ func (c *Counter) ResetLoop(errch chan error) {
 		"jobworker:reset_loop",
 		"jobworker:lock",
 		"jobworker:count",
-		"jobworker:report:count",
-	}
-	args := []interface{}{
-		c.id,
-		int(c.limitDuration / time.Second),
+		"jobworker:count_history",
 	}
 
 	ticker := time.NewTicker(c.limitDuration)
@@ -102,6 +101,11 @@ func (c *Counter) ResetLoop(errch chan error) {
 	for {
 		select {
 		case <-ticker.C:
+			args := []interface{}{
+				c.id,
+				int(c.limitDuration / time.Second),
+				time.Now().Unix(),
+			}
 			_, err := lua.Exec(c.rclient, keys, args...)
 			if err != nil {
 				errch <- err
