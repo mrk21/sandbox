@@ -1,0 +1,21 @@
+---
+version: '3.7'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+      target: development
+    init: true
+    command:
+      codep
+        "1=while :; do sleep 1; done"
+    volumes:
+      - .:/app
+      - gomod:/go
+
+volumes:
+  redis:
+    driver: local
+  gomod:
+    driver: local
