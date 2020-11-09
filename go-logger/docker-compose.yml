@@ -9,7 +9,7 @@ services:
     init: true
     command:
       codep
-        "1=while :; do sleep 1; done"
+        "1=bash -c 'while :; do echo test; sleep 10; done'"
     volumes:
       - .:/app
       - gomod:/go

@@ -33,6 +33,7 @@ func NewStdLogger(level Level) *StdLogger {
 	logger.buildTagStr()
 	return logger
 }
+
 func (logger *StdLogger) buildTagStr() {
 	logger.tagStr = ""
 	if len(logger.tags) != 0 {
