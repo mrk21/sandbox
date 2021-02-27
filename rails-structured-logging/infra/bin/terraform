@@ -1,0 +1,14 @@
+#!/bin/bash
+ROOT_DIR=$(cd $(dirname $0); pwd -P | xargs dirname)
+
+exec docker run \
+  -it \
+  --rm \
+  --workdir=$(pwd -P) \
+  -v "${ROOT_DIR}:${ROOT_DIR}" \
+  -e "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" \
+  -e "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" \
+  -e "AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}" \
+  -e "TF_VAR_RDS_USER=${RDS_USER}" \
+  -e "TF_VAR_RDS_PASSWORD=${RDS_PASSWORD}" \
+  ${TERRAFORM_DOCKER_IMAGE} $*

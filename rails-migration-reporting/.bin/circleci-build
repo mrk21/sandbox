@@ -1,0 +1,9 @@
+#!/bin/bash
+PROJECT_DIR=$(cd $(dirname $0); pwd -P | xargs dirname)
+ROOT_DIR=$(dirname ${PROJECT_DIR})
+cd ${PROJECT_DIR}
+. .envrc
+cd ${ROOT_DIR}
+
+exec circleci build \
+  -e RAILS_MIGRATION_REPORTING__SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}

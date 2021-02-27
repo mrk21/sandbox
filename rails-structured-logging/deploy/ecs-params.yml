@@ -11,17 +11,17 @@ task_definition:
       mem_reservation: 512M
       secrets:
         - name: DB_HOST
-          value_from: ecs-test_db-host
+          value_from: /rails-structured-logging/production/rds/host
         - name: DB_PORT
-          value_from: ecs-test_db-port
+          value_from: /rails-structured-logging/production/rds/port
         - name: DB_USER
-          value_from: ecs-test_db-user
+          value_from: /rails-structured-logging/production/rds/user
         - name: DB_PASSWORD
-          value_from: ecs-test_db-password
+          value_from: /rails-structured-logging/production/rds/password
         - name: REDIS_HOST
-          value_from: ecs-test_redis-host
+          value_from: /rails-structured-logging/production/redis/host
         - name: REDIS_PORT
-          value_from: ecs-test_redis-port
+          value_from: /rails-structured-logging/production/redis/port
 
 run_params:
   network_configuration:

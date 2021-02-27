@@ -1,0 +1,9 @@
+
+-- +migrate Up
+CREATE TABLE users(
+  `id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+-- +migrate Down
+DROP TABLE users;

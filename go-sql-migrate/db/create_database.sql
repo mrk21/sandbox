@@ -1,0 +1,1 @@
+CREATE DATABASE `go-sql-migrate_development` DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

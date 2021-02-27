@@ -1,0 +1,30 @@
+#!/bin/ruby
+
+def report
+  schema_diff = `git diff HEAD^ HEAD #{Rails.root.join('db/schema.rb')}`
+  migration_diff = `git diff --name-only HEAD^ HEAD #{Rails.root.join('db/migrate/')}`
+  report = ''
+
+  StringIO.open(report, 'w') do |io|
+    io.puts '# Migration Report'
+    io.puts ''
+
+    io.puts '## Modified Migrations'
+    io.puts ''
+    io.puts migration_diff.split(/\n/).map { |l| "* #{l}" }.join("\n")
+    io.puts ''
+
+    io.puts '## Schema diff'
+    io.puts ''
+    io.puts '```'
+    io.puts schema_diff
+    io.puts '```'
+  end
+
+  if ENV['SLACK_WEBHOOK_URL'].present?
+    notifier = Slack::Notifier.new ENV['SLACK_WEBHOOK_URL']
+    notifier.ping report
+  end
+end
+
+report
