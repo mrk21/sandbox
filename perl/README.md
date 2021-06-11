@@ -6,4 +6,6 @@
 
 ```sh
 cpan Object::Simple
+cpan Mouse
+cpan Moose
 ```
