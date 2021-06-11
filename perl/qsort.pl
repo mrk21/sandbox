@@ -1,7 +1,7 @@
 use utf8;
 
 sub qsort(&@) {
-  my $code = shift;
+  my $compare = shift;
   my @array = @_;
   if ($#array <= 0) { return @array; }
 
@@ -9,16 +9,20 @@ sub qsort(&@) {
   my @left = ();
   my @right = ();
   foreach (@array) {
-    local $a = $_;
-    local $b = $pivot;
-    if ($code->() == -1) { push @left, $_; }
+    my $is_less_than_pivot;
+    {
+      local $a = $_;
+      local $b = $pivot;
+      $is_less_than_pivot = $compare->() == -1
+    }
+    if ($is_less_than_pivot) { push @left, $_; }
     else { push @right, $_; }
   }
 
   my @result = ();
-  push(@result, &qsort($code, @left));
+  push(@result, &qsort($compare, @left));
   push(@result, $pivot);
-  push(@result, &qsort($code, @right));
+  push(@result, &qsort($compare, @right));
   return @result;
 }
 
