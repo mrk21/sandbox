@@ -100,9 +100,8 @@ sub call_instance_method {
 sub instance_bench {
   print "## instance_bench\n";
   my $n = 100 * 10000;
-  my $result = timethese(3, {
+  my $result = timethese(5, {
     class_struct => sub {
-      my $a = ClassStruct->new(value1 => 1, value2 => 2);
       for (my $i = 0; $i < $n; $i++){
         my $instance = ClassStruct->new(value1 => 1, value2 => 2);
       }
@@ -134,7 +133,7 @@ sub instance_bench {
 sub get_bench {
   print "## get_bench\n";
   my $n = 100 * 10000;
-  my $result = timethese(3, {
+  my $result = timethese(5, {
     class_struct => sub {
       my $instance = ClassStruct->new(value1 => 1, value2 => 2);
       for (my $i = 0; $i < $n; $i++){
@@ -172,7 +171,7 @@ sub get_bench {
 sub set_bench {
   print "## set_bench\n";
   my $n = 100 * 10000;
-  my $result = timethese(3, {
+  my $result = timethese(5, {
     class_struct => sub {
       my $instance = ClassStruct->new(value1 => 1, value2 => 2);
       for (my $i = 0; $i < $n; $i++){
