@@ -6,7 +6,7 @@ use threads::shared;
 use Carp 'croak';
 use Data::Dumper;
 
-package Worker {
+package JobWorker {
     use threads;
     use threads::shared;
     use Thread::Semaphore;
@@ -24,11 +24,12 @@ package Worker {
 
         my $instance = {
             n => $n,
-            que => $que,
-            tids => shared_clone({ value => [] }),
             job => $params{job} // sub {},
+            que => $que,
+            executor_tids => shared_clone({ value => [] }),
             run_semaphore => Thread::Semaphore->new(),
-            fatal_error => shared_clone({ value => undef }),
+            error => shared_clone({ value => undef }),
+            error_semaphore => Thread::Semaphore->new(),
         };
         bless $instance, $class;
         return $instance;
@@ -41,8 +42,8 @@ package Worker {
         {
             my $n = $self->{n};
             for my $i ((0..$n-1)) {
-                my $th = threads->create(sub { $self->worker() });
-                push @{$self->{tids}->{value}}, $th->tid;
+                my $th = threads->create(sub { $self->executor() });
+                push @{$self->{executor_tids}->{value}}, $th->tid;
             }
         }
         $self->{run_semaphore}->up();
@@ -54,31 +55,45 @@ package Worker {
         $self->{run_semaphore}->down();
         {
             $self->{que}->end();
-            threads->object($_)->join() for @{$self->{tids}->{value}};
-            $self->{tids}->{value} = shared_clone([]);
+            threads->object($_)->join for @{$self->{executor_tids}->{value}};
+            $self->{executer_tids}->{value} = shared_clone([]);
         }
         $self->{run_semaphore}->up();
     }
 
     sub enqueue {
         my ($self, $param) = @_;
-        croak $self->fatal_error if $self->fatal_error;
-        $self->{que}->enqueue({ param => $param });
+        croak $self->error if $self->error;
+        $self->{que}->enqueue({ param => $param, job_id => int(rand(100000)) });
     }
 
-    sub fatal_error {
+    sub error {
+        my ($self, $e) = @_;
+        return $self->{error}->{value} unless $e;
+        $self->{error_semaphore}->down();
+        {
+            $self->{error}->{value} //= shared_clone($e);
+            $self->destruct_que();
+        }
+        $self->{error_semaphore}->up();
+        return $self->{error}->{value};
+    }
+
+    sub destruct_que {
         my ($self) = @_;
-        return $self->{fatal_error}->{value};
+        my $size = $self->{que}->pending();
+        $self->{que}->end();
+        $self->{que}->dequeue_nb($size) if $size;
     }
 
-    sub worker {
+    sub executor {
         my ($self) = @_;
         my $que = $self->{que};
         my $job = $self->{job};
 
         while (my $item = $que->dequeue()) {
-            return if $self->fatal_error;
-            my $job_id = int(rand(100000));
+            return if $self->error;
+            my $job_id = $item->{job_id};
             my $param = $item->{param};
 
             local $@;
@@ -88,7 +103,7 @@ package Worker {
             # fatal error
             if ($e) {
                 warn $e;
-                $self->{fatal_error}->{value} = shared_clone($e);
+                $self->error($e);
                 return;
             }
         }
@@ -126,11 +141,10 @@ package ExponentialRetrier {
             if ($e) {
                 die $e unless $e =~ $self->retry_error;
                 $retry_count++;
-                print "## retry: $retry_count\n";
                 croak 'reach max retry count' if $retry_count > $self->{max_retry};
                 $sleep *= 2;
                 sleep $sleep;
-                $self->{on_retry}->();
+                $self->{on_retry}->($retry_count);
                 next;
             }
             last;
@@ -151,32 +165,48 @@ package ExponentialRetrier {
 }
 
 sub main {
-    my $count :shared = 0;
-    my $retry :shared = 0;
-    my $failed :shared = 0;
+    my $count = shared_clone({
+        ok => 0,
+        retry => 0,
+        failed => 0,
+    });
+    my $count_semaphore = Thread::Semaphore->new();
+    my $increment_count = sub {
+        my $type = shift;
+        $count_semaphore->down();
+        $count->{$type}++;
+        $count_semaphore->up();
+    };
 
-    my $worker = Worker->new(n => 3, job => sub {
+    my $worker = JobWorker->new(n => 3, job => sub {
         my ($worker, $job_id, $param) = @_;
         my $retrier = ExponentialRetrier->new(
             max_retry => 3,
             default_sleep => 1,
-            on_retry => sub { $retry++ },
+            on_retry => sub {
+                my $retry_count = shift;
+                print "job $job_id: retry: $retry_count\n";
+                $increment_count->('retry');
+            },
         );
         $retrier->retriable(sub {
+            return if $worker->error;
+
             print "job $job_id: item: ", Dumper($param);
+            sleep 1;
 
             if (rand() < 0.1) {
-                $failed++;
+                $increment_count->('failed');
                 croak "job $job_id: fatal_error";
             }
-            if (rand() < 0.5) {
+            if (rand() < 0.4) {
                 warn "job $job_id: error";
-                $failed++;
-                return if $worker->fatal_error;
+                $increment_count->('failed');
+                return if $worker->error;
                 $retrier->retry();
             }
             print "job $job_id: ok\n";
-            $count++;
+            $increment_count->('ok');
         });
     });
 
@@ -189,11 +219,10 @@ sub main {
     };
     my $e = $@;
     $worker->stop();
+    $e ||= $worker->error;
 
-    if ($e || $worker->fatal_error) {
-        warn "## fatal_error: $e";
-    }
-    print "## count: $count, failed: $failed, retry: $retry\n";
+    warn "## fatal_error: $e" if $e;
+    print "## ok: ". $count->{ok} .", failed: ". $count->{failed} .", retry: ". $count->{retry} ."\n";
 }
 
 main();
