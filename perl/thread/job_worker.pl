@@ -6,6 +6,10 @@ use threads::shared;
 use Carp 'croak';
 use Data::Dumper;
 
+sub gen_id {
+    return sprintf('%010d', int(rand(10000000000 - 1)));
+}
+
 package JobWorker {
     use threads;
     use threads::shared;
@@ -18,7 +22,7 @@ package JobWorker {
         my $class = shift;
         my %params = @_;
 
-        my $n = $params{n} // 1;
+        my $n = $params{n} // 1; croak '`n` must be greater than or equal to 1' if $n < 1;
         my $que = Thread::Queue->new();
         $que->limit = $n;
 
@@ -30,6 +34,8 @@ package JobWorker {
             run_semaphore => Thread::Semaphore->new(),
             error => shared_clone({ value => undef }),
             error_semaphore => Thread::Semaphore->new(),
+            is_killed => 0,
+            kill_semaphore => Thread::Semaphore->new(),
         };
         bless $instance, $class;
         return $instance;
@@ -37,34 +43,42 @@ package JobWorker {
 
     sub start {
         my ($self) = @_;
+        print "worker: starting...\n";
 
         $self->{run_semaphore}->down();
         {
             my $n = $self->{n};
             for my $i ((0..$n-1)) {
-                my $th = threads->create(sub { $self->executor() });
+                my $th = threads->create(sub { $self->executor(::gen_id()) });
                 push @{$self->{executor_tids}->{value}}, $th->tid;
             }
         }
         $self->{run_semaphore}->up();
+        print "worker: started\n";
     }
 
     sub stop {
         my ($self) = @_;
+        print "worker: stopping...\n";
 
         $self->{run_semaphore}->down();
         {
             $self->{que}->end();
-            threads->object($_)->join for @{$self->{executor_tids}->{value}};
+            my @tids = @{$self->{executor_tids}->{value}};
+            my @tids_without_self = grep { $_ != threads->tid } @tids;
+            my @threads = map { threads->object($_) } @tids_without_self;
+            my @running_threads = grep { defined($_) and $_->running } @threads;
+            $_->join for @running_threads;
             $self->{executer_tids}->{value} = shared_clone([]);
         }
         $self->{run_semaphore}->up();
+        print "worker: stopped\n";
     }
 
     sub enqueue {
         my ($self, $param) = @_;
         croak $self->error if $self->error;
-        $self->{que}->enqueue({ param => $param, job_id => int(rand(100000)) });
+        $self->{que}->enqueue({ param => $param, job_id => ::gen_id() });
     }
 
     sub error {
@@ -73,23 +87,33 @@ package JobWorker {
         $self->{error_semaphore}->down();
         {
             $self->{error}->{value} //= shared_clone($e);
-            $self->destruct_que();
+            $self->kill();
         }
         $self->{error_semaphore}->up();
         return $self->{error}->{value};
     }
 
-    sub destruct_que {
+    sub kill {
         my ($self) = @_;
-        my $size = $self->{que}->pending();
-        $self->{que}->end();
-        $self->{que}->dequeue_nb($size) if $size;
+        return if $self->{is_killed};
+        $self->{kill_semaphore}->down();
+        {
+            return if $self->{is_killed};
+            $self->{is_killed} = 1;
+            print "worker: kill\n";
+
+            my $size = $self->{que}->pending();
+            $self->{que}->end();
+            $self->{que}->dequeue_nb($size) if $size;
+        }
+        $self->{kill_semaphore}->up();
     }
 
     sub executor {
-        my ($self) = @_;
+        my ($self, $executor_id) = @_;
         my $que = $self->{que};
         my $job = $self->{job};
+        print "executor $executor_id: start\n";
 
         while (my $item = $que->dequeue()) {
             return if $self->error;
@@ -104,9 +128,10 @@ package JobWorker {
             if ($e) {
                 warn $e;
                 $self->error($e);
-                return;
+                last;
             }
         }
+        print "executor $executor_id: stop\n";
     }
 }
 
@@ -119,7 +144,7 @@ package ExponentialRetrier {
         my %params = @_;
 
         my $instance = {
-            id => int(rand(10000)),
+            id => ::gen_id(),
             max_retry => $params{max_retry} // 3,
             default_sleep => $params{default_sleep} // 1,
             on_retry => $params{on_retry} // sub {},
@@ -189,6 +214,8 @@ sub main {
                 $increment_count->('retry');
             },
         );
+        print "job $job_id: start\n";
+
         $retrier->retriable(sub {
             return if $worker->error;
 
@@ -203,11 +230,13 @@ sub main {
                 warn "job $job_id: error";
                 $increment_count->('failed');
                 return if $worker->error;
+                print "job $job_id: retrying...\n";
                 $retrier->retry();
             }
             print "job $job_id: ok\n";
             $increment_count->('ok');
         });
+        print "job $job_id: finish\n";
     });
 
     $worker->start();
