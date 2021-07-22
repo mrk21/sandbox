@@ -116,7 +116,7 @@ package JobWorker {
         print "executor $executor_id: start\n";
 
         while (my $item = $que->dequeue()) {
-            return if $self->error;
+            last if $self->error;
             my $job_id = $item->{job_id};
             my $param = $item->{param};
 
