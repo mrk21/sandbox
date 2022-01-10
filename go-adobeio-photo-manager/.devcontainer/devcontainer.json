@@ -1,0 +1,12 @@
+{
+	"name": "photo-manager",
+	"dockerComposeFile": [
+		"../docker-compose.yml"
+	],
+	"service": "app",
+	"remoteUser": "root",
+	"workspaceFolder": "/app",
+	"extensions": [
+		"golang.go"
+	]
+}

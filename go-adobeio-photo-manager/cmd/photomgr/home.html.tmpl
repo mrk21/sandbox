@@ -1,0 +1,15 @@
+<!doctype html>
+<meta charset="UTF-8">
+<title>photo-manager</title>
+
+<h1>photo-manager</h1>
+<form method="POST" action="/session">
+	<input type="hidden" name="_method" value="DELETE">
+	<input type="submit" value="sign out">
+</form>
+
+{{range .Assets}}
+	<a href="/assets/{{$.Catalog.Id}}/{{.Id}}">
+		<img src="/assets/{{$.Catalog.Id}}/{{.Id}}/thumbnail2x">
+	</a>
+{{end}}
