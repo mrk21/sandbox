@@ -1,35 +1,49 @@
 # go-adobeio-photo-manager
 
-## mkcert
+## Setup
+
+### mkcert
 
 [mkcert](https://github.com/FiloSottile/mkcert)
 
-### Install local CA
+#### Install local CA
 
 ```sh
 mkcert -install
 ```
 
-### Create certificate
+#### Create certificate
 
 ```
 cd docker/nginx
 mkcert localhost 127.0.0.1 ::1
 ```
 
-## docker
+### docker
 
-### install devcontainer-cli
+```
+cp .envrc.local.sample .envrc.local
+vi .envrc.local
+direnv allow .
+docker-compose build
+docker-compose up
+docker-compose exec app go run cmd/photomgr/*.go
+open https://localhost:8000/
+```
+
+### Optional: install devcontainer-cli
 
 - https://code.visualstudio.com/docs/remote/devcontainer-cli
 
-## use vscode remote
+#### Use vscode remote
 
 ```sh
 docker-compose up
 devcontainer open
 ```
 
-## Adobe Lightroom API
+## Refer to
+
+### Adobe Lightroom API
 
 [API Docs](https://www.adobe.io/apis/creativecloud/lightroom/apidocs.html#!docs/api/LightroomPartnerAPIsSpec.json)
