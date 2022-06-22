@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# This `code` command is for containers, and it can also execute on terminals other than vscode.
+# If you use it, you must execute it after attaching the container in vscode.
+# see: VSCode Remote SSHで別Shellからファイルを開く https://zenn.dev/shirou/articles/vscode-remote-open-file
+
+export VSCODE_IPC_HOOK_CLI=$(ls -t /tmp/vscode-ipc-*.sock | head -1)
+CODE=$(ls -t ~/.vscode-server/bin/*/bin/code | head -1)
+exec ${CODE} $*

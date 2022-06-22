@@ -1,0 +1,5 @@
+#!/bin/bash
+CURRENT_DIR=$(pwd | sed -E "s/$(echo ${PROJECT_ROOT}/ | sed 's/\//\\\//g')//g")/
+CURRENT_DIR_ON_CONTAINER=${APP_CONTAINER_PROJECT_ROOT}/${CURRENT_DIR}
+
+exec docker-compose exec -w ${CURRENT_DIR_ON_CONTAINER} app code $*
