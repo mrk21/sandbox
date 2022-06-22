@@ -8,43 +8,43 @@ use lib abs_path(dirname(__FILE__));
 use Data::Dumper;
 
 package Foo {
-    use ClassBuilder qw(attr);
+    use ClassBuilder qw(has);
 
     sub new {
         my ($class, $hashref) = @_;
         return bless $hashref, $class;
     }
 
-    attr 'a', type => 'Int';
-    attr 'b', type => 'Int';
+    has a => ( is => 'rw', isa => 'Int' );
+    has b => ( is => 'rw', isa => 'Int' );
 }
 
 package Bar {
-    use ClassBuilder qw(attr);
+    use ClassBuilder qw(has);
 
     sub new {
         my ($class, $hashref) = @_;
         return bless $hashref, $class;
     }
 
-    attr 'c', type => 'Int';
+    has c => ( is => 'rw', isa => 'Int' );
 }
 
 package Buzz {
-    use ClassBuilder qw(attr);
+    use ClassBuilder qw(has);
 
     sub new {
         my ($class, $hashref) = @_;
         return bless $hashref, $class;
     }
 
-    attr 'value', type => 'Int';
-    attr 'foo', type => 'Foo';
+    has value => ( is => 'rw', isa => 'Int' );
+    has foo   => ( is => 'rw', isa => 'Foo' );
 }
 
 my $buzz = Buzz->new({ value => 1, foo => Foo->new({ a => 1, b => 2 }) });
 
-print Dumper(Buzz->meta->attr_names);
+print Dumper(Buzz->meta->get_attribute_list);
 
 print Dumper($buzz->value);
 # $buzz->value('a'); #=> Error
