@@ -14,6 +14,14 @@ package ClassBuilder {
 
     my %META; # All classes meta. `Hash[ClassBuilder::Meta]` class_name => meta
 
+    sub check_attributes {
+        my $class = caller;
+        my $instance = shift;
+        foreach my $attr (@{$class->meta->get_all_attributes}) {
+            $attr->isa->assert_valid($instance->{$attr->name});
+        }
+    }
+
     sub has {
         no strict 'refs'; # This requires at `*{hoge} = sub { ... }`
         my $class = caller; # `caller` is a package that called this subroutine.
@@ -22,25 +30,22 @@ package ClassBuilder {
         my $is = $spec{is};
         my $isa = $spec{isa};
         $isa = find_type_constraint($isa) // type $isa => where { ref $_ eq $isa };
+        $spec{isa} = $isa;
 
         my $accessor;
         if ($is eq 'rw') {
             $accessor = sub {
-                my $self = shift;
-
-                if (@_) {
-                    my $value = shift;
-                    $isa->assert_valid($value);
-                    $self->{$name} = $value;
+                if (scalar @_ == 1) {
+                    return $_[0]->{$name};
                 } else {
-                    return $self->{$name};
+                    $isa->assert_valid($_[1]);
+                    $_[0]->{$name} = $_[1];
                 }
             };
         }
         elsif ($is eq 'r') {
             $accessor = sub {
-                my $self = shift;
-                return $self->{$name};
+                return $_[0]->{$name};
             };
         }
 
