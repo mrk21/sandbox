@@ -79,7 +79,9 @@
 
 **AuthUser IAM role policy:**
 
-*Replace `<your-bucket-name>` to your s3 bucket name*
+*Replace `<your-bucket-name>` to your S3 bucket name*
+*Replace `<your-client-app-name>` to your Application Client name for the Cognito UserPool*
+
 
 ```json
 {
@@ -122,7 +124,7 @@
       "Condition": {
         "StringLike": {
           "s3:prefix": [
-            "cognito/test/${cognito-identity.amazonaws.com:sub}/*"
+            "cognito/<your-client-app-name>/${cognito-identity.amazonaws.com:sub}/*"
           ]
         }
       }
@@ -136,7 +138,7 @@
         "s3:PutObject"
       ],
       "Resource": [
-        "arn:aws:s3:::<your-bucket-name>/cognito/test/${cognito-identity.amazonaws.com:sub}/*"
+        "arn:aws:s3:::<your-bucket-name>/cognito/<your-client-app-name>/${cognito-identity.amazonaws.com:sub}/*"
       ]
     }
   ]
@@ -145,7 +147,7 @@
 
 **UnAuthUser IAM role policy:**
 
-*Replace `<your-bucket-name>` to your s3 bucket name*
+*Replace `<your-bucket-name>` to your S3 bucket name*
 
 ```json
 {
