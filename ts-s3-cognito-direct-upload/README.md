@@ -80,6 +80,7 @@
 **AuthUser IAM role policy:**
 
 *Replace `<your-bucket-name>` to your S3 bucket name*
+
 *Replace `<your-client-app-name>` to your Application Client name for the Cognito UserPool*
 
 
