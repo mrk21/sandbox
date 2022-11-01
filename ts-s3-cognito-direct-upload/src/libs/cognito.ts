@@ -176,7 +176,7 @@ export async function initCognitoIdentityCredentials(
   dispatch: Dispatch<AppAction>
 ) {
   const userPool = getCognitoUserPool();
-  const region = "ap-northeast-1";
+  const region = AWSRegion;
   const options = {
     clientConfig: {
       region: AWSRegion,
