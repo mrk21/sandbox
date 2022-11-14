@@ -1,0 +1,32 @@
+---
+version: '3.8'
+services:
+  app:
+    image: golang:1.19.3
+    init: true
+    command: sleep infinity
+    depends_on:
+      - db
+    working_dir: /app
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+
+  db:
+    image: mysql:8.0
+    init: true
+    volumes:
+      - type: volume
+        source: db
+        target: /var/lib/mysql
+      - type: bind
+        source: ./docker/mysql/my.cnf
+        target: /etc/mysql/conf.d/my.cnf
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      TZ: Asia/Tokyo
+
+volumes:
+  db:
+
