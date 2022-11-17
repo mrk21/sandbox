@@ -1,0 +1,31 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:import/recommended",
+    "plugin:import/warnings",
+    "prettier"
+  ],
+  "rules": {
+    "import/order": [
+      "error",
+      {
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ],
+    "react-hooks/exhaustive-deps": "off"
+  },
+  // @see [import-js/eslint-import-resolver-typescript: This plugin adds `TypeScript` support to `eslint-plugin-import`](https://github.com/import-js/eslint-import-resolver-typescript)
+  // @see [Typescript/ESLint error: Unable to resolve path to module 'aws-lambda' import/no-unresolved - Stack Overflow](https://stackoverflow.com/questions/65369472/typescript-eslint-error-unable-to-resolve-path-to-module-aws-lambda-import-no)
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      }
+    }
+  }
+}
