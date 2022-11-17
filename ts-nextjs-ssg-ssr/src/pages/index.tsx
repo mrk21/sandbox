@@ -9,7 +9,7 @@ type Props = {
 const Home: NextPage<Props> = ({ blogs }) => {
   return (
     <div>
-      <h1>記事一覧(SSG)</h1>
+      <h1>Entries(SSG)</h1>
       <ul>
         {blogs.map((blog) => (
           <li key={blog.id}>

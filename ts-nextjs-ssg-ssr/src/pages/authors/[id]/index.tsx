@@ -13,7 +13,7 @@ interface Params extends ParsedUrlQuery {
 const AuthorDetail: NextPage<Props> = ({ author }) => {
   return (
     <div>
-      <h1>{author.name}</h1>
+      <h1>Author(SSR): {author.name}</h1>
       <p>{author.profile}</p>
     </div>
   );

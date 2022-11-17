@@ -51,14 +51,14 @@ const BlogComments: React.FC = () => {
 const BlogDetail: NextPage<Props> = ({ blog }) => {
   return (
     <div>
-      <h1>{blog.title}</h1>
+      <h1>Blog detail(SSG) with comments(CSR): {blog.title}</h1>
       <p>{blog.body}</p>
       <BlogComments />
       <p>
-        <Link href={`/authors/${blog.authorId}`}>著者</Link>
+        <Link href={`/authors/${blog.authorId}`}>Author</Link>
       </p>
       <p>
-        <Link href="/">戻る</Link>
+        <Link href="/">Back</Link>
       </p>
     </div>
   );
