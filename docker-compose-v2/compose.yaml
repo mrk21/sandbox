@@ -1,0 +1,46 @@
+services:
+  app:
+    image: golang:1.20.1
+    init: true
+    command: go run .
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    depends_on:
+      db:
+        condition: service_healthy
+    working_dir: /app
+    ports:
+      - target: 8080
+        published: 8080
+
+  db:
+    image: mysql:8
+    init: true
+    volumes:
+      - type: volume
+        source: db
+        target: /var/lib/mysql
+    ports:
+      - target: 3306
+        published: 3306
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "0.0.0.0"]
+      interval: 1s
+      timeout: 1s
+      retries: 3
+      start_period: 1s
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: app
+    configs:
+      - source: mysql-config
+        target: /etc/mysql/conf.d/my.cnf
+
+volumes:
+  db:
+
+configs:
+  mysql-config:
+    file: ./my.cnf
