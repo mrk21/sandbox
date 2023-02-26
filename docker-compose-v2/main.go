@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 type Hoge struct {
@@ -17,9 +19,14 @@ type Hoge struct {
 func main() {
 	log.Println("booting...")
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Panicln(err)
+	}
+
 	conf := mysql.Config{
-		User:      "root",
-		Passwd:    "",
+		User:      os.Getenv("DB_USER"),
+		Passwd:    os.Getenv("DB_PASS"),
 		Net:       "tcp",
 		Addr:      "db:3306",
 		DBName:    "app",
