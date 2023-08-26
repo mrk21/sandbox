@@ -1,0 +1,59 @@
+---
+services:
+  rails_base:
+    build:
+      context: .
+      dockerfile: docker/rails/Dockerfile
+      target: base
+      platforms:
+        - linux/amd64
+    platform: linux/amd64
+    command: sleep infinity
+    volumes:
+      - ..:/sandbox:rw
+      - cache:/app/tmp/cache
+      - node_modules:/app/node_modules
+      - bundle:/usr/local/bundle
+    environment:
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      DATABASE_HOST: db
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+      POWER_BI_WORKSPACE_ID: ${POWER_BI_WORKSPACE_ID}
+      POWER_BI_REPORT_ID: ${POWER_BI_REPORT_ID}
+
+  rails:
+    extends:
+      service: rails_base
+    depends_on:
+      - db
+    command: |
+      bash -c "
+        trap 'kill \$(jobs -p)' EXIT;
+        rails server -b 0.0.0.0 &
+        yarn watch &
+        wait
+      "
+    ports:
+      - ${DOCKER_HOST_APP_PORT:-3000}:3000
+
+  db:
+    image: mysql:8.0
+    platform: linux/amd64
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - ${DOCKER_HOST_DB_PORT:-3306}:3306
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+
+volumes:
+  mysql_data:
+    driver: local
+  bundle:
+    driver: local
+  node_modules:
+    driver: local
+  cache:
+    driver: local

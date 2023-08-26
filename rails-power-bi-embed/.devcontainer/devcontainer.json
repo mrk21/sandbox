@@ -1,0 +1,19 @@
+// See: Dev Container metadata reference https://containers.dev/implementors/json_reference/
+{
+    "name": "rails-power-bi-embed",
+    "dockerComposeFile": [
+        "../compose.yaml"
+    ],
+    "service": "rails_base",
+    "remoteUser": "root",
+    "workspaceFolder": "/sandbox/rails-power-bi-embed",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "rebornix.ruby",
+                "eamodio.gitlens",
+                "GitHub.copilot"
+            ]
+        }
+    }
+}

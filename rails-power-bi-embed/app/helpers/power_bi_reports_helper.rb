@@ -1,0 +1,2 @@
+module PowerBiReportsHelper
+end

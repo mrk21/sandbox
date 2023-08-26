@@ -1,0 +1,25 @@
+{
+  "name": "rails-power-bi-embed",
+  "version": "1.0.0",
+  "description": "This README would normally document whatever steps are necessary to get the application up and running.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "dev": "webpack --progress --color --mode=development",
+    "watch": "webpack --progress --color --watch --mode=development"
+  },
+  "dependencies": {
+    "powerbi-client": "^2.22.3"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-assets-manifest": "^5.1.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "author": "",
+  "license": "MIT"
+}

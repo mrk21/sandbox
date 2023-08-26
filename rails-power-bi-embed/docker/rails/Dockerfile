@@ -1,0 +1,41 @@
+FROM --platform=linux/amd64 ruby:3.2.2 AS base
+ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND noninteractive
+
+# Install basic packages
+RUN apt-get update -qq && \
+    apt-get install -y build-essential tree vim less dnsutils net-tools && \
+    apt-get install -y --no-install-recommends apt-utils
+
+# Install MySQL client
+RUN apt-get install -y default-mysql-client
+
+# Install Node.js
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install --global yarn
+
+# Install bundler
+RUN gem install bundler:2.4.14
+
+ARG RAILS_ENV=development
+ENV RAILS_ENV=${RAILS_ENV}
+
+ENV APP_HOME /sandbox/rails-power-bi-embed
+RUN mkdir -p $APP_HOME
+WORKDIR $APP_HOME
+
+# Change /bin/sh to bash from dash
+# @see https://superuser.com/questions/715722/how-to-do-dpkg-reconfigure-dash-as-bash-automatically
+RUN echo "dash dash/sh boolean false" | debconf-set-selections && \
+    dpkg-reconfigure dash
+
+# NOTE: A login shell overrides the PATH environment variable set by docker,
+# so I set same value as the environment variable to .profile.
+# By means of this, PATH environment variable is same value on non login shell and login shell.
+ENV PATH=$APP_HOME/bin:$PATH
+RUN echo "export PATH=$PATH" >> /root/.profile
+
+ENV SHELL=/bin/bash
+ENV SERVICE=app
+COPY ./docker/rails/bashrc.sh /root/.bashrc

@@ -1,0 +1,11 @@
+.bundle
+log/*
+tmp/*
+storage/*
+public/assets
+public/packs
+config/master.key
+.envrc
+yarn-error.log
+.DS_Store
+node_modules
