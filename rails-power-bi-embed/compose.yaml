@@ -17,9 +17,12 @@ services:
     environment:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       DATABASE_HOST: db
+      AZURE_AUTH_MODE: ${AZURE_AUTH_MODE}
       AZURE_TENANT_ID: ${AZURE_TENANT_ID}
       AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
       AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+      AZURE_MASTER_USERNAME: ${AZURE_MASTER_USERNAME}
+      AZURE_MASTER_PASSWORD: ${AZURE_MASTER_PASSWORD}
       POWER_BI_WORKSPACE_ID: ${POWER_BI_WORKSPACE_ID}
       POWER_BI_REPORT_ID: ${POWER_BI_REPORT_ID}
 
@@ -31,8 +34,8 @@ services:
     command: |
       bash -c "
         trap 'kill \$(jobs -p)' EXIT;
-        rails server -b 0.0.0.0 &
-        yarn watch &
+        (rm -rf tmp/pids/server.pid && rails server -b 0.0.0.0) &
+        yarn dev:watch:srv &
         wait
       "
     ports:

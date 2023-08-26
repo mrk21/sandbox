@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install basic packages
 RUN apt-get update -qq && \
-    apt-get install -y build-essential tree vim less dnsutils net-tools && \
+    apt-get install -y build-essential tree vim less dnsutils net-tools jq && \
     apt-get install -y --no-install-recommends apt-utils
 
 # Install MySQL client
@@ -38,4 +38,6 @@ RUN echo "export PATH=$PATH" >> /root/.profile
 
 ENV SHELL=/bin/bash
 ENV SERVICE=app
+ENV EDITOR=vi
+ENV RAILS_LOG_TO_STDOUT=1
 COPY ./docker/rails/bashrc.sh /root/.bashrc

@@ -6,8 +6,9 @@ require_relative 'azure_ad'
 
 module PowerBi
   class ApiClient
-    def initialize(token)
+    def initialize(token, logger:)
       @token = token
+      @logger_io = LoggerIO.new(logger)
     end
 
     # @see https://learn.microsoft.com/en-us/rest/api/power-bi/reports/get-report-in-group
@@ -17,12 +18,12 @@ module PowerBi
       req['Content-Type'] = "application/json"
       req['Authorization'] = "Bearer #{@token.token}"
 
-      result = Net::HTTP.start(url.host, url.port, use_ssl: true) {|http|
-        res = http.request(req)
-        raise StandardError, "Invalid Response(#{res.code}): #{res.body}" if res.code != '200'
-        body = JSON.parse(res.body)
-        body
-      }
+      http = Net::HTTP.new(url.host, url.port)
+      http.use_ssl = true
+      http.set_debug_output(@logger_io) if ENV['OAUTH_DEBUG'] == 'true'
+      res = http.request(req)
+      raise StandardError, "Invalid Response(#{res.code}): #{res.body}" if res.code != '200'
+      body = JSON.parse(res.body)
     end
 
     # @see https://learn.microsoft.com/en-us/rest/api/power-bi/embed-token/generate-token
@@ -33,12 +34,22 @@ module PowerBi
       req['Authorization'] = "Bearer #{@token.token}"
       req.body = form.to_json
 
-      result = Net::HTTP.start(url.host, url.port, use_ssl: true) {|http|
-        res = http.request(req)
-        raise StandardError, "Invalid Response(#{res.code}): #{res.body}" if res.code != '200'
-        body = JSON.parse(res.body)
-        body
-      }
+      http = Net::HTTP.new(url.host, url.port)
+      http.use_ssl = true
+      http.set_debug_output(@logger_io) if ENV['OAUTH_DEBUG'] == 'true'
+      res = http.request(req)
+      raise StandardError, "Invalid Response(#{res.code}): #{res.body}" if res.code != '200'
+      body = JSON.parse(res.body)
+    end
+  end
+
+  class LoggerIO < IO
+    def initialize(logger)
+      @logger = logger
+    end
+
+    def write(str)
+      @logger.debug(str.strip)
     end
   end
 end

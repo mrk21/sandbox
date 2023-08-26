@@ -34,5 +34,16 @@ module RailsPowerBiEmbed
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    config.log_formatter = ::Logger::Formatter.new
+    config.log_tags = [ :request_id ]
+
+    if ENV["RAILS_LOG_TO_STDOUT"].present?
+      logger        = ActiveSupport::Logger.new(STDOUT)
+      logger.formatter = config.log_formatter
+      config.logger = ActiveSupport::TaggedLogging.new(logger)
+    end
+
+    ENV['OAUTH_DEBUG'] = 'true'
   end
 end

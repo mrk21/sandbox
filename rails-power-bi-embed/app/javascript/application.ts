@@ -28,19 +28,16 @@ async function embed() {
   const report = powerbi.embed(reportContainer, reportLoadConfig);
 
   report.off("loaded");
-
   report.on("loaded", function () {
       console.log("Report load successful");
   });
 
   report.off("rendered");
-
   report.on("rendered", function () {
       console.log("Report render successful");
   });
 
   report.off("error");
-
   report.on("error", function (event) {
       let errorMsg = event.detail;
       console.error(errorMsg);
