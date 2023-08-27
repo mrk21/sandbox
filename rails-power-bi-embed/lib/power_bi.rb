@@ -23,7 +23,7 @@ module PowerBi
       http.set_debug_output(@logger_io) if ENV["OAUTH_DEBUG"] == "true"
       res = http.request(req)
       raise StandardError, "Invalid Response(#{res.code}): #{res.body}" if res.code != "200"
-      body = JSON.parse(res.body)
+      body = JSON.parse(res.body, object_class: OpenStruct)
     end
 
     # @see https://learn.microsoft.com/en-us/rest/api/power-bi/embed-token/generate-token
@@ -39,7 +39,7 @@ module PowerBi
       http.set_debug_output(@logger_io) if ENV["OAUTH_DEBUG"] == "true"
       res = http.request(req)
       raise StandardError, "Invalid Response(#{res.code}): #{res.body}" if res.code != "200"
-      body = JSON.parse(res.body)
+      body = JSON.parse(res.body, object_class: OpenStruct)
     end
   end
 

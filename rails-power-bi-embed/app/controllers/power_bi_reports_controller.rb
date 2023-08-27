@@ -38,10 +38,10 @@ class PowerBiReportsController < ApplicationController
     # Generate Power BI Embed Token
     form = {
       reports: [{
-        id: report["id"],
+        id: report.id,
       }],
       datasets: [{
-        id: report["datasetId"],
+        id: report.datasetId,
       }],
       targetWorkspaces: [{
         id: workspace_id,
@@ -51,13 +51,13 @@ class PowerBiReportsController < ApplicationController
 
     # Response
     res = {
-      accessToken: embed_token["token"],
-      expiry: embed_token["expiration"],
+      accessToken: embed_token.token,
+      expiry: embed_token.expiration,
       embedUrl: [
         {
-          reportId: report["id"],
-          reportName: report["name"],
-          embedUrl: report["embedUrl"],
+          reportId: report.id,
+          reportName: report.name,
+          embedUrl: report.embedUrl,
         },
       ],
     }
