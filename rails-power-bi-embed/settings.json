@@ -1,0 +1,52 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.stylelint": true
+  },
+  "eslint.validate": ["html", "javascriptreact", "typescriptreact"],
+  "css.validate": false,
+  "scss.validate": false,
+
+  // @see [Typescript auto-import and import suggestions not picking up alias path in compilerOptions · Issue #59815 · microsoft/vscode](https://github.com/Microsoft/vscode/issues/59815#issuecomment-427246447)
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.enabled": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.includeCompletionsForImportStatements": true,
+
+  "[typescript]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[typescriptreact]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[javascript]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[javascriptreact]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[html]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[css]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  }
+}

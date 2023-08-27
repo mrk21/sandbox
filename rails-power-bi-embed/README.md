@@ -2,17 +2,24 @@
 
 ## Dependencies
 
-- ruby 3.2.2
-- rails: 7.0.7.2
-- mysql: 8.0
-- Node.js
-- TypeScript
-- webpack
-- gems:
-  - oauth2
-  - simpacker
-- npm packages:
-  - powerbi-client
+- middlewares/frameworks:
+  - Ruby 3.2.2
+  - Rails: 7.0.7.2
+  - MySQL: 8.0
+  - Node.js
+  - TypeScript
+- devtools:
+  - Docker
+  - direnv
+  - webpack
+  - ESLint
+  - Prettier
+- libraries:
+  - Ruby:
+    - oauth2
+    - simpacker
+  - Node.js:
+    - powerbi-client
 
 ## Setup
 

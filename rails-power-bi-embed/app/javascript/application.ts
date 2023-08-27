@@ -4,19 +4,19 @@ import * as pbi from "powerbi-client";
 const powerbi = new pbi.service.Service(
   pbi.factories.hpmFactory,
   pbi.factories.wpmpFactory,
-  pbi.factories.routerFactory
+  pbi.factories.routerFactory,
 );
 
 const models = pbi.models;
 
 async function embed() {
-  const reportContainer = window.document.getElementById("report_container")
-  if (!reportContainer) throw new Error("report_container not found")
+  const reportContainer = window.document.getElementById("report_container");
+  if (!reportContainer) throw new Error("report_container not found");
 
   powerbi.bootstrap(reportContainer, { type: "report" });
 
-  const res = await fetch('/power_bi_reports/embed_data')
-  const embedData = await res.json()
+  const res = await fetch("/power_bi_reports/embed_data");
+  const embedData = await res.json();
 
   const reportLoadConfig = {
     type: "report",
@@ -29,19 +29,18 @@ async function embed() {
 
   report.off("loaded");
   report.on("loaded", function () {
-      console.log("Report load successful");
+    console.log("Report load successful");
   });
 
   report.off("rendered");
   report.on("rendered", function () {
-      console.log("Report render successful");
+    console.log("Report render successful");
   });
 
   report.off("error");
   report.on("error", function (event) {
-      let errorMsg = event.detail;
-      console.error(errorMsg);
-      return;
+    const errorMsg = event.detail;
+    console.error(errorMsg);
   });
 }
 

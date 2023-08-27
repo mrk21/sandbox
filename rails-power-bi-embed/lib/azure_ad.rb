@@ -1,11 +1,11 @@
-require 'oauth2'
+require "oauth2"
 
 module AzureAd
   AppConfig = Struct.new(
     :client_id,
     :client_secret,
     :authority,
-    keyword_init: true
+    keyword_init: true,
   )
 
   class AppClient
@@ -28,7 +28,7 @@ module AzureAd
       client_id = @config.client_id
       client_secret = @config.client_secret
       token_url = File.join(@config.authority, "/oauth2/v2.0/token")
-      scope = scopes.join(',')
+      scope = scopes.join(",")
 
       client = OAuth2::Client.new(
         client_id,
@@ -53,7 +53,7 @@ module AzureAd
       client_id = @config.client_id
       client_secret = @config.client_secret
       token_url = File.join(@config.authority, "/oauth2/v2.0/token")
-      scope = scopes.join(',')
+      scope = scopes.join(",")
 
       client = OAuth2::Client.new(
         client_id,
