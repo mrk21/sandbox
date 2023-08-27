@@ -14,6 +14,7 @@
   - webpack
   - ESLint
   - Prettier
+  - Rufo
 - libraries:
   - Ruby:
     - oauth2
