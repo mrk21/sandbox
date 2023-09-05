@@ -6,34 +6,15 @@ class PowerBiReportsController < ApplicationController
   end
 
   def embed_data
-    # Get Access Token
-    config = AzureAd::AppConfig.new(
-      client_id: ENV["AZURE_CLIENT_ID"],
-      client_secret: ENV["AZURE_CLIENT_SECRET"],
-      authority: File.join("https://login.microsoftonline.com", ENV["AZURE_TENANT_ID"]),
-    )
-    azure_ad_app = AzureAd::AppClient.new(config, logger: Rails.logger)
-    scopes = ["https://analysis.windows.net/powerbi/api/.default"]
-    token = case ENV["AZURE_AUTH_MODE"]
-      when "service_principal"
-        azure_ad_app.acquire_token_by_client_credential(
-          scopes: scopes,
-        )
-      when "master_user"
-        azure_ad_app.acquire_token_by_username_password(
-          scopes: scopes,
-          username: ENV["AZURE_MASTER_USERNAME"],
-          password: ENV["AZURE_MASTER_PASSWORD"],
-        )
-      else
-        raise ArgumentError, "Invalid AZURE_AUTH_TYPE: #{ENV["AZURE_AUTH_TYPE"]}"
-      end
+    # Get Access Token and make PowerBI REST API client
+    powerbi = PowerBi::auth_and_make_client_from_global_config
+
+    # Params
+    report_id = ENV["POWER_BI_REPORT_ID"]
+    workspace_id = ENV["POWER_BI_WORKSPACE_ID"]
 
     # Get PowerBI Report
-    powerbi = PowerBi::ApiClient.new(token, logger: Rails.logger)
-    workspace_id = ENV["POWER_BI_WORKSPACE_ID"]
-    report_id = ENV["POWER_BI_REPORT_ID"]
-    report = powerbi.group_report(group_id: workspace_id, report_id: report_id)
+    report = powerbi.get_report_in_group(group_id: workspace_id, report_id: report_id)
 
     # Generate Power BI Embed Token
     form = {
