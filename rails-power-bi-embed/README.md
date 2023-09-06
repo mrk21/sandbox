@@ -67,3 +67,4 @@ devcontainer open .
 - [RailsからWebpackerを外してpureなwebpack構成にしてみる その2 | Mission-Street.](https://hakozaru.com/posts/purge-webpacker-2)
 - [Azure の REST API を curl で操作する - Qiita](https://qiita.com/TsuyoshiUshio@github/items/3d903f071b8cb8305496)
 - [microsoft/PowerBI-Developer-Samples: A collection of Power BI samples for developer use.](https://github.com/microsoft/PowerBI-Developer-Samples)
+- [プッシュデータセットを試してみよう - Speaker Deck](https://speakerdeck.com/hanaseleb/putusiyudetasetutowoshi-sitemiyou)

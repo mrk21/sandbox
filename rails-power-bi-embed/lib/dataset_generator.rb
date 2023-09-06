@@ -1,3 +1,4 @@
+# NOTE: A push-dataset can not export to a .pbix file.
 class DatasetGenerator
   def initialize
     # Get Access Token and make PowerBI REST API client
@@ -5,13 +6,15 @@ class DatasetGenerator
   end
 
   def create_filtered_dataset_from_source_dataset
-    soruce_dataset = create_dataset(name: "SalesMarketing_from")
+    soruce_dataset = create_dataset(name: "SalesMarketing_source")
     push_dataset(dataset_id: soruce_dataset.id)
 
-    dest_dataset = create_dataset(name: "SalesMarketing_to")
+    dest_dataset = create_dataset(name: "SalesMarketing_dest")
     dest_rows = fetch_dataset_rows(dataset_id: soruce_dataset.id, query: "EVALUATE FILTER(Product, Product[ProductID] > 1)")
     dest_rows = dest_rows.results[0].tables[0].rows.map(&method(:row_to_hash))
     push_dataset(dataset_id: dest_dataset.id, data: { rows: dest_rows })
+
+    OpenStruct.new(soruce_dataset: soruce_dataset, dest_dataset: dest_dataset)
   end
 
   def create_dataset(name: "SalesMarketing")
