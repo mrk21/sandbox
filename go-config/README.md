@@ -29,5 +29,5 @@ docker compose exec app make
 docker compose exec app go run ./cmd/config/
 
 # Run config command(single binary)
-docker compose exec config
+docker compose exec app config
 ```
