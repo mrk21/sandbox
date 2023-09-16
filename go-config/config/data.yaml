@@ -1,0 +1,5 @@
+clone_db:
+  host: {{ env "CLONE_DB_HOST" "DB_HOST" "localhost" }}
+  port: {{ env "CLONE_DB_PORT" "DB_PORT" "3306" }}
+  user: {{ env "CLONE_DB_USER" "DB_USER" "root" }}
+  pass: {{ env "CLONE_DB_PASS" "DB_PASS" "" }}

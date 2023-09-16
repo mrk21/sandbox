@@ -1,0 +1,20 @@
+// See: Dev Container metadata reference https://containers.dev/implementors/json_reference/
+{
+    "name": "sandbox-go-config",
+    "dockerComposeFile": [
+        "../compose.yaml"
+    ],
+    "service": "app",
+    "remoteUser": "root",
+    "workspaceFolder": "/app/go-config",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "golang.go",
+                "golang.go-nightly",
+                "eamodio.gitlens",
+                "GitHub.copilot"
+            ]
+        }
+    }
+}

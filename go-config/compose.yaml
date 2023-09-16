@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/app
+    working_dir: /app/go-config
+    command: sleep infinity
+    environment:
+      CLONE_DB_HOST: clone-db
+      CLONE_DB_PORT: 3306
+      CLONE_DB_USER: clone_db_user
+      CLONE_DB_PASS: clone_db_pass
