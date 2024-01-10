@@ -47,13 +47,14 @@ export default function Home() {
     const json = JSON.stringify(data, null, 2);
     const csv = unparse(data);
 
-    const csv_ = Encoding.convert(csv, { to: encoding, type: 'arraybuffer' });
-    const uint8Array = new Uint8Array(csv_);
-    const blob = new Blob([uint8Array], { type: `text/csv;charset=${EncodingNames[encoding]}` });
+    const csvEncodedData = Encoding.convert(csv, { to: encoding, type: 'arraybuffer' });
+    const csvEncoded = Buffer.from(csvEncodedData).toString();
+    const csvEncodedBinary = new Uint8Array(csvEncodedData);
+    const blob = new Blob([csvEncodedBinary], { type: `text/csv;charset=${EncodingNames[encoding]}` });
     const url = URL.createObjectURL(blob);
 
     setJson(json);
-    setCsv(csv);
+    setCsv(csvEncoded);
     setURL(url);
 
     return () => {
