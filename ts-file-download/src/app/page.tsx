@@ -16,12 +16,16 @@ const EncodingType = {
   SJIS: 'SJIS',
 } as const;
 
-const EncodingNames = {
+type EncodingName = typeof EncodingName[keyof typeof EncodingName];
+const EncodingName = {
   [EncodingType.UTF8]: 'UTF-8',
   [EncodingType.SJIS]: 'Shift-JIS',
 } as const;
 
-const encodingTypeOptions = Object.values(EncodingType).map((value) => ({ name: EncodingNames[value], value } as const));
+const EncodingOptions = [
+  { name: EncodingName[EncodingType.UTF8], value: EncodingType.UTF8 },
+  { name: EncodingName[EncodingType.SJIS], value: EncodingType.SJIS },
+] as const;
 
 export default function Home() {
   const [encoding, setEncoding] = useState<EncodingType>(EncodingType.UTF8);
@@ -50,7 +54,7 @@ export default function Home() {
     const csvEncodedData = Encoding.convert(csv, { to: encoding, type: 'arraybuffer' });
     const csvEncoded = Buffer.from(csvEncodedData).toString();
     const csvEncodedBinary = new Uint8Array(csvEncodedData);
-    const blob = new Blob([csvEncodedBinary], { type: `text/csv;charset=${EncodingNames[encoding]}` });
+    const blob = new Blob([csvEncodedBinary], { type: `text/csv;charset=${EncodingName[encoding]}` });
     const url = URL.createObjectURL(blob);
 
     setJson(json);
@@ -81,7 +85,7 @@ export default function Home() {
             <b>Encoding:</b>
             <span>
               <select onChange={onChangeEncoding} value={encoding}>
-              { encodingTypeOptions.map(({ name, value }) =>
+              { EncodingOptions.map(({ name, value }) =>
                 <option key={value} value={value}>{name}</option>
               ) }
               </select>
@@ -93,7 +97,7 @@ export default function Home() {
           <label>
             <b>N:</b>
             <span>
-              <input type="number" onChange={onChangeN} value={n} />
+              <input type="number" min={1} onChange={onChangeN} value={n} />
             </span>
           </label>
         </p>
