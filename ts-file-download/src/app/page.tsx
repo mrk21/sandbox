@@ -2,6 +2,7 @@
 
 import { unparse } from "papaparse";
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
+import Encoding from 'encoding-japanese';
 
 function* times(n: number) {
   for (let i = 0; i < n; i++) {
@@ -9,11 +10,26 @@ function* times(n: number) {
   }
 }
 
+type EncodingType = typeof EncodingType[keyof typeof EncodingType];
+const EncodingType = {
+  UTF8: 'UTF8',
+  SJIS: 'SJIS',
+} as const;
+
+const EncodingNames = {
+  [EncodingType.UTF8]: 'UTF-8',
+  [EncodingType.SJIS]: 'Shift-JIS',
+} as const;
+
+const encodingTypeOptions = Object.values(EncodingType).map((value) => ({ name: EncodingNames[value], value } as const));
+
 export default function Home() {
+  const [encoding, setEncoding] = useState<EncodingType>(EncodingType.UTF8);
   const [filename, setFilename] = useState("data.csv");
   const [n, setN] = useState(10);
   const [name, setName] = useState("name :id:");
 
+  const onChangeEncoding = useCallback((e: ChangeEvent<HTMLSelectElement>) => { setEncoding(e.target.value as EncodingType) }, [setEncoding]);
   const onChangeFilename = useCallback((e: ChangeEvent<HTMLInputElement>) => { setFilename(e.target.value) }, [setFilename]);
   const onChangeN = useCallback((e: ChangeEvent<HTMLInputElement>) => { setN(parseInt(e.target.value)) }, [setN]);
   const onChangeName = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => { setName(e.target.value) }, [setName]);
@@ -30,7 +46,10 @@ export default function Home() {
     }));
     const json = JSON.stringify(data, null, 2);
     const csv = unparse(data);
-    const blob = new Blob([csv], {type: 'text/csv'});
+
+    const csv_ = Encoding.convert(csv, { to: encoding, type: 'arraybuffer' });
+    const uint8Array = new Uint8Array(csv_);
+    const blob = new Blob([uint8Array], { type: `text/csv;charset=${EncodingNames[encoding]}` });
     const url = URL.createObjectURL(blob);
 
     setJson(json);
@@ -40,7 +59,7 @@ export default function Home() {
     return () => {
       URL.revokeObjectURL(url);
     };
-  }, [n, name]);
+  }, [n, name, encoding]);
 
   return (
     <>
@@ -52,6 +71,19 @@ export default function Home() {
             <b>Filename:</b>
             <span>
               <input type="text" onChange={onChangeFilename} value={filename} />
+            </span>
+          </label>
+        </p>
+
+        <p>
+          <label>
+            <b>Encoding:</b>
+            <span>
+              <select onChange={onChangeEncoding} value={encoding}>
+              { encodingTypeOptions.map(({ name, value }) =>
+                <option key={value} value={value}>{name}</option>
+              ) }
+              </select>
             </span>
           </label>
         </p>
