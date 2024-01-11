@@ -1,0 +1,65 @@
+---
+services:
+  app_base:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    init: true
+    command: sleep infinity
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+      - type: volume
+        source: cache
+        target: /app/tmp/cache
+      - type: volume
+        source: node_modules
+        target: /app/node_modules
+      - type: volume
+        source: bundle
+        target: /usr/local/bundle
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASS: postgres
+
+  app:
+    extends:
+      service: app_base
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+        rm -rf tmp/pids/server.pid &&
+        bundle exec rails s -b 0.0.0.0 -p 3000
+      "
+    ports:
+      - target: 3000
+        published: 3000
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - type: volume
+        source: postgres_data
+        target: /var/lib/postgresql/data
+    ports:
+      - target: 5432
+        published: 5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "bash", "-c", "pg_isready -U postgres || exit 1"]
+      interval: 1s
+      timeout: 20s
+      retries: 20
+
+volumes:
+  postgres_data:
+  bundle:
+  node_modules:
+  cache:
