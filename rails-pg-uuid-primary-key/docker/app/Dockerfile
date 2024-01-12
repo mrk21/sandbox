@@ -15,6 +15,9 @@ RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
 # Install bundler
 RUN gem install bundler
 
+# Install PostgreSQL client
+RUN apt-get install -y postgresql-client-15
+
 ENV APP_HOME /app
 RUN mkdir -p $APP_HOME
 WORKDIR $APP_HOME

@@ -1,4 +1,4 @@
-module UseUuidV4PrimaryKey
+module HasUuid4PrimaryKey
   extend ActiveSupport::Concern
 
   included do
@@ -10,6 +10,6 @@ module UseUuidV4PrimaryKey
 
     self.implicit_order_column = :created_at
     scope :oldest, -> { order(created_at: :asc) }
-    scope :latest, -> { order(created_at: :desc) }
+    scope :newest, -> { order(created_at: :desc) }
   end
 end

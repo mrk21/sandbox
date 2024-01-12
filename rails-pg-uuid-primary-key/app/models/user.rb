@@ -1,3 +1,3 @@
 class User < ApplicationRecord
-  include UseUuidV4PrimaryKey
+  include HasUuid4PrimaryKey
 end

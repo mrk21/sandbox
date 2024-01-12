@@ -34,8 +34,11 @@ module RailsPgUuidPrimaryKey
     # Don't generate system test files.
     config.generators.system_tests = nil
 
-    config.generators do |g|
-      g.orm :active_record, primary_key_type: :uuid
-    end
+    # If you want to use UUID on primary key, you need to enable this configs.
+    config.generators.orm :active_record, primary_key_type: :uuid
+
+    # Dump structure.sql instead of schema.rb because dump definition custom functions.
+    # When you enable it, you must install PostgreSQL client.
+    config.active_record.schema_format = :sql
   end
 end

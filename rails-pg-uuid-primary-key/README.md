@@ -25,9 +25,7 @@ open http://localhost:3000
 module RailsPgUuidPrimaryKey
   class Application < Rails::Application
     ...
-+    config.generators do |g|
-+      g.orm :active_record, primary_key_type: :uuid
-+    end
++    config.generators.orm :active_record, primary_key_type: :uuid
   end
 end
 ```
@@ -52,7 +50,7 @@ end
 class User < ApplicationRecord
 +  self.implicit_order_column = :created_at
 +  scope :oldest, -> { order(created_at: :asc) }
-+  scope :latest, -> { order(created_at: :desc) }
++  scope :newest, -> { order(created_at: :desc) }
 end
 ```
 
@@ -68,6 +66,59 @@ class UsersController < ApplicationController
   end
 ```
 
+## How to introduce UUID v7 to primary key
+
+**config/application.rb:**
+
+```rb
+module RailsPgUuidPrimaryKey
+  class Application < Rails::Application
+    ...
++    config.generators.orm :active_record, primary_key_type: :uuid
++    config.active_record.schema_format = :sql
+  end
+end
+```
+
+**db/migrate/00000000000000_create_users2.rb:**
+
+```rb
+class CreateUsers < ActiveRecord::Migration[7.0]
+  def change
++    execute <<~SQL
++      create or replace function gen_uuid_v7()
++      returns uuid
++      as $$
++      begin
++        -- use random v4 uuid as starting point (which has the same variant we need)
++        -- then overlay timestamp
++        -- then set version 7 by flipping the 2 and 1 bit in the version 4 string
++        return encode(
++          set_bit(
++            set_bit(
++              overlay(uuid_send(gen_random_uuid())
++                      placing substring(int8send(floor(extract(epoch from clock_timestamp()) * 1000)::bigint) from 3)
++                      from 1 for 6
++              ),
++              52, 1
++            ),
++            53, 1
++          ),
++          'hex')::uuid;
++      end
++      $$
++      language plpgsql
++      volatile;
++    SQL
+
+-    create_table :user2s, id: :uuid do |t|
++    create_table :user2s, id: :uuid, default: 'gen_uuid_v7()' do |t|
+      ...
+    end
+  end
+end
+```
+
 ## References
 
 - [Docker の公式 PostgreSQL イメージでの HEALTHCHECK 指定方法まとめ | gotohayato.com](https://gotohayato.com/content/562/)
@@ -75,3 +126,4 @@ class UsersController < ApplicationController
 - [Rails6 のちょい足しな新機能を試す71（implict_order_column 編） #Ruby - Qiita](https://qiita.com/suketa/items/932f47dbbecd55d7f58d)
 - [Postgres と MySQL における id, created_at, updated_at に関するベストプラクティス](https://zenn.dev/mpyw/articles/rdb-ids-and-timestamps-best-practices)
 - [Docker の公式 PostgreSQL イメージでの HEALTHCHECK 指定方法まとめ | gotohayato.com](https://gotohayato.com/content/562/)
+- [Postgres PL/pgSQL function for UUID v7 and a bonus custom UUID v8 to support microsecond precision as well. Read more here: https://datatracker.ietf.org/doc/draft-peabody-dispatch-new-uuid-format/](https://gist.github.com/kjmph/5bd772b2c2df145aa645b837da7eca74)
