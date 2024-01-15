@@ -153,6 +153,37 @@ CREATE TABLE public.user2s (
 
 
 --
+-- Name: user3s; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.user3s (
+    id bigint NOT NULL,
+    name character varying,
+    created_at timestamp(6) without time zone NOT NULL,
+    updated_at timestamp(6) without time zone NOT NULL
+);
+
+
+--
+-- Name: user3s_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.user3s_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: user3s_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.user3s_id_seq OWNED BY public.user3s.id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -162,6 +193,13 @@ CREATE TABLE public.users (
     created_at timestamp(6) without time zone NOT NULL,
     updated_at timestamp(6) without time zone NOT NULL
 );
+
+
+--
+-- Name: user3s id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user3s ALTER COLUMN id SET DEFAULT nextval('public.user3s_id_seq'::regclass);
 
 
 --
@@ -189,6 +227,14 @@ ALTER TABLE ONLY public.user2s
 
 
 --
+-- Name: user3s user3s_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.user3s
+    ADD CONSTRAINT user3s_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -212,6 +258,7 @@ SET search_path TO "$user", public;
 INSERT INTO "schema_migrations" (version) VALUES
 ('20240111112320'),
 ('20240111112321'),
-('20240111191427');
+('20240111191427'),
+('20240112080813');
 
 

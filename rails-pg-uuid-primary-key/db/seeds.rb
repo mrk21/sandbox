@@ -7,3 +7,4 @@
 #   Character.create(name: "Luke", movie: movies.first)
 5.times.each {|i| User.create(name: "name #{i+1}") }
 5.times.each {|i| User2.create(name: "name #{i+1}") }
+5.times.each {|i| User3.create(name: "name #{i+1}") }
