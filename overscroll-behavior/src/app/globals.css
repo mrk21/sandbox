@@ -1,0 +1,55 @@
+.open-button {
+  display: block;
+  position: fixed;
+  z-index: 100;
+  top: 20px;
+  right: 20px;
+}
+
+.modal {
+  display: block;
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: scroll;
+  overscroll-behavior: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out, z-index 0.2s ease-in-out;
+}
+.modal.open {
+  z-index: 1000;
+  opacity: 1;
+  transition: ease-in-out, opacity 0.2s ease-in-out;
+}
+.modal::after {
+  display: block;
+  position: absolute;
+  z-index: 1;
+  content: ' ';
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(100% + 1px);
+  background-color: #000;
+  opacity: 0.4;
+  transition: opacity 0.2s ease-in-out;
+}
+.modal-content {
+  display: block;
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px;
+  border: 1px solid #aaa;
+  background-color: #fff;
+}
+.modal-body {
+  overflow-y: auto;
+  max-height: 10em;
+  overscroll-behavior: contain;
+}
