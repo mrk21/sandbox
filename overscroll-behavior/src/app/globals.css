@@ -44,8 +44,7 @@
   */
   height: calc(100% + 1px);
   /**/
-  background-color: #000;
-  opacity: 0.4;
+  background-color: rgba(0, 0, 0, 0.4);
   transition: opacity 0.2s ease-in-out;
 }
 .modal-content {
@@ -63,9 +62,10 @@
   transform: translate(-50%, -50%);
   width: 500px;
   min-height: 200px;
-  border: 1px solid #aaa;
+  border: 1px solid #888;
   border-radius: 10px;
   background-color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 5px 20px;
 }
 .modal-header {
   width: 100%;
