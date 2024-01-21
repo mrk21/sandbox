@@ -30,8 +30,10 @@ export default function Home() {
             ) }
           </div>
           <div className="modal-footer">
-            <button onClick={onClickCloseButton}>OK</button>
-            <button onClick={onClickCloseButton}>Cancel</button>
+            <ul className="modal-footer-menus">
+              <li><button onClick={onClickCloseButton}>OK</button></li>
+              <li><button onClick={onClickCloseButton}>Cancel</button></li>
+            </ul>
           </div>
         </div>
       </div>

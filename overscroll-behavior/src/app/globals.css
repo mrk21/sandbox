@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 .open-button {
   display: block;
   position: fixed;
@@ -14,8 +18,10 @@
   left: 0;
   right: 0;
   bottom: 0;
+  /* Modal layer is always enabled scrollbar, and it does not propagate to parent nodes on scrolling. */
   overflow-y: scroll;
   overscroll-behavior: none;
+  /**/
   opacity: 0;
   transition: opacity 0.2s ease-in-out, z-index 0.2s ease-in-out;
 }
@@ -32,24 +38,70 @@
   top: 0;
   left: 0;
   right: 0;
+  /*
+    This element's height is always set 1px grater than parent node's height, so the bar of the parent node's scrollbar are always visible.
+    The reason is that `overscroll-behavior` property only works only when the node enables the scrollbar and its bar are visible.
+  */
   height: calc(100% + 1px);
+  /**/
   background-color: #000;
   opacity: 0.4;
   transition: opacity 0.2s ease-in-out;
 }
 .modal-content {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  /*
+    This node `position` property is set to `absolute`, but I really wanted to set its value to `fixed`.
+    The reason is that `overscroll-behavior` property does not work when it is set `fixed`.
+  */
   position: absolute;
+  /**/
   z-index: 2;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 10px;
+  width: 500px;
+  min-height: 200px;
   border: 1px solid #aaa;
+  border-radius: 10px;
   background-color: #fff;
 }
+.modal-header {
+  width: 100%;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+.modal-header h2 {
+  margin: 0;
+}
 .modal-body {
+  width: 100%;
+  height: 200px;
+  padding: 15px;
   overflow-y: auto;
-  max-height: 10em;
   overscroll-behavior: contain;
+}
+.modal-body p {
+  margin: 0;
+  margin-bottom: 1em;
+}
+.modal-body p:last-child {
+  margin: 0;
+}
+.modal-footer {
+  width: 100%;
+  margin-top: auto;
+  padding: 15px;
+  border-top: 1px solid #ddd;
+}
+.modal-footer-menus {
+  display: flex;
+  flex-direction: row;
+  column-gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+.modal-footer-menus li {
+  display: block;
 }
