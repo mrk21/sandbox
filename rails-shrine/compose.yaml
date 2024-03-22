@@ -1,0 +1,110 @@
+---
+services:
+  app_base:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    init: true
+    command: sleep infinity
+    volumes:
+      - type: bind
+        source: ..
+        target: /sandbox
+      - type: volume
+        source: cache
+        target: /sandbox/rails-shrine/tmp/cache
+      - type: volume
+        source: node_modules
+        target: /sandbox/rails-shrine/node_modules
+      - type: volume
+        source: bundle
+        target: /usr/local/bundle
+    environment:
+      DB_HOST: db
+      FILE_AWS_S3_ENDPOINT: http://minio.${HOST_IP:-127.0.0.1}.nip.io:9000
+      FILE_ACCESS_KEY_ID: user
+      FILE_SECRET_ACCESS_KEY: password
+
+  app:
+    extends:
+      service: app_base
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    command: >
+      bash -c "
+        rm -rf tmp/pids/server.pid &&
+        bundle exec rails s -b 0.0.0.0 -p 3000
+      "
+    ports:
+      - target: 3000
+        published: ${DOCKER_HOST_APP_PORT:-3000}
+
+  db:
+    image: mysql:8
+    volumes:
+      - type: volume
+        source: mysql_data
+        target: /var/lib/mysql
+    ports:
+      - target: 3306
+        published: ${DOCKER_HOST_DB_PORT:-3306}
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 1s
+      timeout: 20s
+      retries: 20
+
+  minio:
+    image: minio/minio:RELEASE.2023-07-11T21-29-34Z
+    ports:
+      - target: 9000
+        published: ${DOCKER_HOST_MINIO_PORT:-9000}
+      - target: 9001
+        published: ${DOCKER_HOST_MINIO_CONSOLE_PORT:-9001}
+    command: minio server /data --console-address ':9001'
+    environment:
+      MINIO_DOMAIN: minio.${HOST_IP:-127.0.0.1}.nip.io
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: password
+    volumes:
+      - type: volume
+        source: minio
+        target: /data
+    networks:
+      default:
+        aliases:
+          - minio.${HOST_IP:-127.0.0.1}.nip.io
+          - file.minio.${HOST_IP:-127.0.0.1}.nip.io
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 1s
+      timeout: 20s
+      retries: 20
+
+  mc:
+    image: minio/mc:RELEASE.2023-07-11T23-30-44Z
+    profiles:
+      - tools
+    depends_on:
+      minio:
+        condition: service_healthy
+    volumes:
+      - type: volume
+        source: mc
+        target: /root/.mc
+      - type: bind
+        source: ./docker/mc/config.json
+        target: /root/.mc/config.json
+
+volumes:
+  mysql_data:
+  bundle:
+  node_modules:
+  cache:
+  minio:
+  mc:

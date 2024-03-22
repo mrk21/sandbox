@@ -1,0 +1,5 @@
+ja:
+  activerecord:
+    errors:
+      messages:
+        invalid_mime_type: 'MIMEタイプは %{valid_types} のいずれかとなります(%{value})'
