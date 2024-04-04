@@ -1,0 +1,97 @@
+---
+services:
+  app_base:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    init: true
+    command: sleep infinity
+    volumes:
+      - type: bind
+        source: ..
+        target: /sandbox
+      - type: volume
+        source: bundle
+        target: /usr/local/bundle
+    environment:
+      DB_HOST: db
+      MONGO_HOST: mongo:27017
+      MONGO_USERNAME: root
+      MONGO_PASSWORD: example
+
+  app:
+    extends:
+      service: app_base
+    depends_on:
+      db:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    command: >
+      bash -c "
+        rm -rf tmp/pids/server.pid &&
+        bundle exec rails s -b 0.0.0.0 -p 3000
+      "
+    ports:
+      - target: 3000
+        published: ${DOCKER_HOST_APP_PORT:-3000}
+
+  db:
+    image: mysql:8
+    volumes:
+      - type: volume
+        source: mysql_data
+        target: /var/lib/mysql
+    ports:
+      - target: 3306
+        published: ${DOCKER_HOST_DB_PORT:-3306}
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      start_period: 10s
+      start_interval: 1s
+      interval: 600s
+      timeout: 30s
+      retries: 0
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - 27017
+    healthcheck:
+      test: ["CMD", "mongosh", "localhost:27017/test", "--eval", "db.runCommand('ping').ok", "--quiet"]
+      start_period: 5s
+      start_interval: 1s
+      interval: 600s
+      timeout: 30s
+      retries: 0
+    volumes:
+      - type: volume
+        source: mongo-data
+        target: /data/db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - target: 8081
+        published: ${DOCKER_HOST_MONGODB_EXPRESS_PORT:-8081}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+volumes:
+  mysql_data:
+  bundle:
+  node_modules:
+  cache:
+  mongo-data:

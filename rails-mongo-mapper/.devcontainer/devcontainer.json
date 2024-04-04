@@ -1,0 +1,17 @@
+// See: Dev Container metadata reference https://containers.dev/implementors/json_reference/
+{
+  "name": "rails-mongo-mapper",
+  "dockerComposeFile": ["../compose.yaml"],
+  "service": "app_base",
+  "remoteUser": "root",
+  "workspaceFolder": "/sandbox/rails-mongo-mapper",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.ruby",
+        "eamodio.gitlens",
+        "GitHub.copilot"
+      ]
+    }
+  }
+}
