@@ -7,7 +7,6 @@
 - Ruby: 3.x
 - Rails: 7.x
 - MySQL: 8.x
-- MinIO
 - Docker: >= 25.0
 - Docker Compose
 - direnv
