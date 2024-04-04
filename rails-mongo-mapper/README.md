@@ -1,4 +1,4 @@
-# Rails mongo mrapper
+# Rails mongo mapper
 
 ## Dependencies
 
