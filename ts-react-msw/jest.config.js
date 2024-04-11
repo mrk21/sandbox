@@ -11,5 +11,5 @@ export default {
     customExportConditions: [''],
   },
   setupFiles: ['./jest.polyfills.js'],
-  setupFilesAfterEnv: ["<rootDir>/setupTests.js"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 };
