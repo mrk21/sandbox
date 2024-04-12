@@ -64,6 +64,10 @@ $ npm install --save-dev @testing-library/react @testing-library/user-event
 - [React Testing Library | Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
 - [yasamoka/react-ts-vite-swc-jest-template](https://github.com/yasamoka/react-ts-vite-swc-jest-template/tree/main)
 - [1.x → 2.x - Mock Service Worker](https://mswjs.io/docs/migrations/1.x-to-2.x#requestresponsetextencoder-is-not-defined-jest)
+- [Jest × testing-libraryでmswをセットアップ](https://zenn.dev/mi_6/articles/ec97c0537ab8ca#%E5%8B%95%E3%81%8B%E3%81%AA%E3%81%84)
+- [MSW で加速するフロントエンド開発](https://zenn.dev/takepepe/articles/msw-driven-development)
+- [フロントエンドのテストのモックには msw を使うのが最近の流行りらしい](https://zenn.dev/azukiazusa/articles/using-msw-to-mock-frontend-tests)
+- [jest における MSW の活用事例](https://zenn.dev/takepepe/articles/jest-msw-mocking)
 
 ---
 
