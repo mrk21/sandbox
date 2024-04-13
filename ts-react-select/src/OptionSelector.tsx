@@ -46,7 +46,7 @@ export default function OptionSelector({ title, value, onChange }: OptionSelecto
   const inputId = useMemo(() => inputIdIterator.next().value, []);
 
   return (
-    <div className="option-selector" data-inputid={inputId} data-testid="OptionSelector">
+    <div className="option-selector" data-testid="OptionSelector" data-inputid={inputId}>
       {typeof title !== 'undefined' ? (<label htmlFor={inputId}>{title}:</label>) : undefined}
       <Select
         value={value}

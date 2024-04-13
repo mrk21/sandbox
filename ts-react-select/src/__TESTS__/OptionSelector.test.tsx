@@ -1,4 +1,4 @@
-import { prettyDOM, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import selectEvent from 'react-select-event';
 import OptionSelector, { Option, OptionSelectorProps, getReactSelectInputElement, options } from '../OptionSelector';
 
