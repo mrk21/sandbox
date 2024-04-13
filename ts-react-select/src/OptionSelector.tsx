@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import Select, { Props as SelectProps } from 'react-select'
 
 export type Option = {
@@ -16,6 +16,7 @@ export const options: Option[] = [
 type OnChangeSelect = Required<SelectProps<Option, false>>['onChange'];
 
 export type OptionSelectorProps = {
+  title?: string;
   value: Option | undefined;
   onChange: (option: Option | undefined) => void;
 };
@@ -38,21 +39,21 @@ export function getReactSelectInputElement(el: HTMLElement | undefined | null): 
   return input;
 }
 
-export default function OptionSelector({ value, onChange }: OptionSelectorProps) {
+export default function OptionSelector({ title, value, onChange }: OptionSelectorProps) {
   const onChangeSelect = useCallback<OnChangeSelect>((option) => {
     onChange(option || undefined);
   }, [onChange]);
-
-  const inputId = inputIdIterator.next().value;
+  const inputId = useMemo(() => inputIdIterator.next().value, []);
 
   return (
-    <div data-inputid={inputId} data-testid="OptionSelector">
-      <label htmlFor={inputId}>Select an option:</label>
+    <div className="option-selector" data-inputid={inputId} data-testid="OptionSelector">
+      {typeof title !== 'undefined' ? (<label htmlFor={inputId}>{title}:</label>) : undefined}
       <Select
         value={value}
         options={options}
         onChange={onChangeSelect}
         inputId={inputId}
+        className='option-selector__select'
       />
     </div>
   )

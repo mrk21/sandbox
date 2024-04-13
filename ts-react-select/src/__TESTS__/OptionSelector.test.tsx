@@ -49,27 +49,45 @@ describe('getReactSelectElement()', () => {
 });
 
 describe('<OptionSelector />', () => {
-  describe('when selected value', () => {
-    it('calls onChange() prop with selected value', async () => {
-      let option: Option | undefined = undefined;
-      const onChange = jest.fn(literal<OptionSelectorProps['onChange']>((newOption) => {
-        option = newOption;
-      }));
+  describe('when specified title prop', () => {
+    describe('when selected value', () => {
+      it('calls onChange() prop with selected value', async () => {
+        let option: Option | undefined = undefined;
+        const onChange = jest.fn(literal<OptionSelectorProps['onChange']>((newOption) => {
+          option = newOption;
+        }));
 
-      render(<OptionSelector value={option} onChange={onChange} />);
+        render(<OptionSelector title="option" value={option} onChange={onChange} />);
 
-      // console.log(prettyDOM(getReactSelectInputElement(screen.getByTestId('OptionSelector'))));
-      // console.log(prettyDOM(screen.getByLabelText('Select an option:')));
+        await selectEvent.select(
+          screen.getByLabelText('option:'),
+          [options[1].label]
+        );
 
-      await selectEvent.select(
-        getReactSelectInputElement(screen.getByTestId('OptionSelector')),
-        // or
-        //  screen.getByLabelText('Select an option:'),
-        [options[1].label]
-      );
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(option).toBe(options[1]);
+      });
+    });
+  });
 
-      expect(onChange).toHaveBeenCalledTimes(1);
-      expect(option).toBe(options[1]);
+  describe('when did not specify title prop', () => {
+    describe('when selected value', () => {
+      it('calls onChange() prop with selected value', async () => {
+        let option: Option | undefined = undefined;
+        const onChange = jest.fn(literal<OptionSelectorProps['onChange']>((newOption) => {
+          option = newOption;
+        }));
+
+        render(<OptionSelector value={option} onChange={onChange} />);
+
+        await selectEvent.select(
+          getReactSelectInputElement(screen.getByTestId('OptionSelector')),
+          [options[1].label]
+        );
+
+        expect(onChange).toHaveBeenCalledTimes(1);
+        expect(option).toBe(options[1]);
+      });
     });
   });
 });

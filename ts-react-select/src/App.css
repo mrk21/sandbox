@@ -40,3 +40,19 @@
 .read-the-docs {
   color: #888;
 }
+
+.main {
+  text-align: left;
+}
+
+li strong {
+  margin-right: 0.5em;
+}
+
+.option-selector {
+  margin-bottom: 1em;
+}
+
+.option-selector__select {
+  color: #000;
+}
