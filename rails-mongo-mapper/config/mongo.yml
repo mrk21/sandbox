@@ -4,9 +4,7 @@ defaults: &defaults
   password: <%= ENV['MONGO_PASSWORD'] %>
   auth_source: admin
   options:
-    w: 1
-    pool_size: 1
-    slave_ok: false
+    max_pool_size: 100
     ssl: false
 
 development:

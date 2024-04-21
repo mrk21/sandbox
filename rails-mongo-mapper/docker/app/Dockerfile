@@ -1,4 +1,4 @@
-FROM ruby:3.2.2
+FROM ruby:3.3.0
 ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -38,3 +38,4 @@ ENV SERVICE=app
 ENV EDITOR=vi
 ENV RAILS_LOG_TO_STDOUT=1
 COPY ./docker/app/bashrc.sh /root/.bashrc
+
