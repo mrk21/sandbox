@@ -1,0 +1,51 @@
+require 'securerandom'
+require 'json'
+require 'pathname'
+require 'time'
+
+$workdir = Pathname.new(ENV.fetch('WORKDIR'))
+
+def write(path, data)
+  json = JSON.generate(data)
+  $workdir.join(path).write(json)
+end
+
+def read(path)
+  json = $workdir.join(path).read
+  JSON.parse(json)
+end
+
+desc 'Request data'
+task :request_data do
+  request = {
+    id: SecureRandom.uuid,
+    type: :request,
+    at: Time.now.utc.iso8601,
+    n: rand(1..100),
+  }
+  write('request.json', request)
+end
+
+desc 'Calculate data'
+task :calculate_data do
+  request = read('request.json')
+  sum = request['n'].times.map{ rand(1..100) }.sum
+  result = {
+    id: request['id'],
+    type: :result,
+    at: Time.now.utc.iso8601,
+    result: sum,
+  }
+  write('result.json', result)
+end
+
+desc 'Post data'
+task :post_data do
+  request = read('request.json')
+  result = read('result.json')
+  output = {
+    request: request,
+    result: result,
+  }
+  puts JSON.generate(output)
+end

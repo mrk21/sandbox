@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: test
+spec:
+  entrypoint: main
+
+  volumeClaimTemplates:
+  - metadata:
+      name: workdir
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+
+  templates:
+  - name: main
+    steps:
+    - - name: request-data
+        template: rake-task
+        arguments:
+          parameters:
+          - name: args
+            value: request_data
+    - - name: calculate-data
+        template: rake-task
+        arguments:
+          parameters:
+          - name: args
+            value: calculate_data
+    - - name: post-data
+        template: rake-task
+        arguments:
+          parameters:
+          - name: args
+            value: post_data
+
+  - name: rake-task
+    inputs:
+      parameters:
+      - name: args
+    container:
+      image: k8s-argo-workflow-rackup:latest
+      imagePullPolicy: Never
+      command: [rake]
+      args: ["{{inputs.parameters.args}}"]
+      env:
+      - name: WORKDIR
+        value: /data
+      volumeMounts:
+      - name: workdir
+        mountPath: /data

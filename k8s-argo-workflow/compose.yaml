@@ -1,0 +1,10 @@
+services:
+  rackup:
+    build: .
+    volumes:
+      - type: bind
+        source: ..
+        target: /sandbox
+    ports:
+      - target: 9292
+        published: 9292
