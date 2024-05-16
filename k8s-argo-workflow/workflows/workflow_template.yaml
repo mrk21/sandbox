@@ -1,9 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+kind: WorkflowTemplate
 metadata:
-  generateName: test
+  name: workflow-template
 spec:
-  entrypoint: main
+  entrypoint: rake-task
 
   volumeClaimTemplates:
   - metadata:
@@ -14,32 +14,16 @@ spec:
         requests:
           storage: 1Gi
 
-  templates:
-  - name: main
-    steps:
-    - - name: request-data
-        template: rake-task
-        arguments:
-          parameters:
-          - name: args
-            value: request_data
-    - - name: calculate-data
-        template: rake-task
-        arguments:
-          parameters:
-          - name: args
-            value: calculate_data
-    - - name: post-data
-        template: rake-task
-        arguments:
-          parameters:
-          - name: args
-            value: post_data
+  arguments:
+    parameters:
+    - name: args
 
+  templates:
   - name: rake-task
     inputs:
       parameters:
       - name: args
+        value: "{{arguments.parameters.args}}"
     container:
       image: k8s-argo-workflow-rackup:latest
       imagePullPolicy: Never
@@ -51,3 +35,7 @@ spec:
       volumeMounts:
       - name: workdir
         mountPath: /data
+    outputs:
+      artifacts:
+      - name: result
+        path: /data

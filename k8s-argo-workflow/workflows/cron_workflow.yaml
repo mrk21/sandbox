@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: cron-workflow
+spec:
+  suspend: false
+  schedule: "* * * * *"
+  concurrencyPolicy: "Replace"
+  startingDeadlineSeconds: 10
+  workflowSpec:
+    entrypoint: main
+
+    volumeClaimTemplates:
+    - metadata:
+        name: workdir
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+
+    templates:
+    - name: main
+      steps:
+      - - name: request-data
+          template: rake-task
+          arguments:
+            parameters:
+            - name: args
+              value: request_data
+      - - name: calculate-data
+          template: rake-task
+          arguments:
+            parameters:
+            - name: args
+              value: calculate_data
+      - - name: result-data
+          template: rake-task
+          arguments:
+            parameters:
+            - name: args
+              value: result_data
+
+    - name: rake-task
+      inputs:
+        parameters:
+        - name: args
+      container:
+        image: k8s-argo-workflow-rackup:latest
+        imagePullPolicy: Never
+        command: [rake]
+        args: ["{{inputs.parameters.args}}"]
+        env:
+        - name: WORKDIR
+          value: /data
+        volumeMounts:
+        - name: workdir
+          mountPath: /data
+      outputs:
+        artifacts:
+        - name: result
+          path: /data

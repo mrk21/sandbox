@@ -30,22 +30,22 @@ desc 'Calculate data'
 task :calculate_data do
   request = read('request.json')
   sum = request['n'].times.map{ rand(1..100) }.sum
-  result = {
+  calcurated = {
     id: request['id'],
     type: :result,
     at: Time.now.utc.iso8601,
-    result: sum,
+    value: sum,
   }
-  write('result.json', result)
+  write('calcurated.json', calcurated)
 end
 
-desc 'Post data'
-task :post_data do
+desc 'Result data'
+task :result_data do
   request = read('request.json')
-  result = read('result.json')
-  output = {
+  calcurated = read('calcurated.json')
+  result = {
     request: request,
-    result: result,
+    calcurated: calcurated,
   }
-  puts JSON.generate(output)
+  write('result.json', result)
 end

@@ -55,7 +55,7 @@ curl -v http://localhost:32660
 kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
 
 # stop argo workflow
-kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
+kubectl delete -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
 
 # boot argo workflow UI
 kubectl -n argo port-forward service/argo-server 2746:2746
@@ -64,7 +64,22 @@ kubectl -n argo port-forward service/argo-server 2746:2746
 open https://localhost:2746
 
 # submit workflow
-argo submit -n argo --watch workflows/test.yaml
+argo submit -n argo --watch workflows/workflow.yaml
+
+# register cron workflow
+argo cron create -n argo workflows/cron_workflow.yaml
+
+# delete cron workflow
+argo cron delete -n argo cron-workflow
+
+# list cron workflow
+argo cron list -n argo
+
+# register workflow template
+argo template create -n argo workflows/workflow_template.yaml
+
+# delete workflow template
+argo template delete -n argo workflow-template
 ```
 
 ## References
