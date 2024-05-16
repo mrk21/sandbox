@@ -1,0 +1,12 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: k-s-argo-workflow
+build:
+  artifacts:
+    - image: k8s-argo-workflow-rackup
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - manifestfile.yaml

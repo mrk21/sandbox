@@ -3,11 +3,11 @@
 ## Dependencies
 
 - Docker
-- Docker Compose
 - Docker Desktop
 - Kubernetes
 - kubectx
 - argo workflow
+- skaffold
 - direnv
 
 ## Setup
@@ -21,15 +21,12 @@ direnv allow .
 # use k8s on docker desktop
 kubectx docker-desktop
 
-# build images
-docker compose build
-
 # create namespace for argo workflow
 kubectl create namespace argo
 kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
 
 # boot cluster
-kubectl apply -f manifestfile.yaml
+skaffold dev
 curl -v http://localhost:32660
 ```
 
@@ -39,14 +36,8 @@ curl -v http://localhost:32660
 # switch kubenetes context
 kubectx docker-desktop
 
-# build image
-docker compose build
-
-# start
-kubectl apply -f manifestfile.yaml
-
-# stop
-kubectl delete -f manifestfile.yaml
+# boot
+skaffold dev
 
 # access to rack pod
 curl -v http://localhost:32660
@@ -91,6 +82,14 @@ argo template delete -n argo workflow-template
 - [hostPathとlocalのPersistentVolumeの違い #kubernetes - Qiita](https://qiita.com/sotoiwa/items/09d2f43a35025e7be782)
 
 ## Memo
+
+```sh
+# start by kubectl
+kubectl apply -f manifestfile.yaml
+
+# stop by kubectl
+kubectl delete -f manifestfile.yaml
+```
 
 ### Default imagePullPolicy
 
