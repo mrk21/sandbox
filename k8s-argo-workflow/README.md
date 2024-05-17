@@ -8,6 +8,7 @@
 - kubectx
 - argo workflow
 - skaffold
+- kustomize
 - direnv
 
 ## Setup
@@ -23,11 +24,15 @@ kubectx docker-desktop
 
 # create namespace for argo workflow
 kubectl create namespace argo
-kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
 
 # boot cluster
-skaffold dev
-curl -v http://localhost:32660
+skaffold dev --port-forward
+curl -v http://localhost:9292
+
+# boot argo workflow
+kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
+kubectl -n argo port-forward service/argo-server 2746:2746
+open https://localhost:2746
 ```
 
 ## Usage
@@ -37,10 +42,10 @@ curl -v http://localhost:32660
 kubectx docker-desktop
 
 # boot
-skaffold dev
+skaffold dev --port-forward
 
 # access to rack pod
-curl -v http://localhost:32660
+curl -v http://localhost:9292
 
 # start argo workflow
 kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/${ARGO_WORKFLOWS_VERSION}/quick-start-minimal.yaml
@@ -55,10 +60,10 @@ kubectl -n argo port-forward service/argo-server 2746:2746
 open https://localhost:2746
 
 # submit workflow
-argo submit -n argo --watch workflows/workflow.yaml
+argo submit -n argo --watch k8s/base/workflows/workflow.yaml
 
 # register cron workflow
-argo cron create -n argo workflows/cron_workflow.yaml
+argo cron create -n argo k8s/base/workflows/cron_workflow.yaml
 
 # delete cron workflow
 argo cron delete -n argo cron-workflow
@@ -67,7 +72,7 @@ argo cron delete -n argo cron-workflow
 argo cron list -n argo
 
 # register workflow template
-argo template create -n argo workflows/workflow_template.yaml
+argo template create -n argo k8s/base/workflows/workflow_template.yaml
 
 # delete workflow template
 argo template delete -n argo workflow-template

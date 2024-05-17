@@ -32,11 +32,9 @@ kind: Service
 metadata:
   name: rackup
 spec:
-  type: NodePort
   ports:
   - name: rackup
     port: 9292
     targetPort: 9292
-    nodePort: 32660
   selector:
     app: rackup
