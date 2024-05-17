@@ -7,14 +7,20 @@ class Retryer
     end
   end
 
-  class ExponentialBackoffAndEqualJitter < Backoff
+  class ExponentialBackoff < Backoff
     def initialize(base:, cap:)
       @base = base
       @cap = cap
     end
 
     def call(attempt)
-      exp = [@cap, 2 ** attempt * @base].min
+      [@cap, 2 ** attempt * @base].min
+    end
+  end
+
+  class ExponentialBackoffAndEqualJitter < ExponentialBackoff
+    def call(attempt)
+      exp = super
       exp / 2.0 + random_between(0, exp / 2.0)
     end
 

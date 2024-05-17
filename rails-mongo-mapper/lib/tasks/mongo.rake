@@ -19,14 +19,14 @@ namespace :mongo do
         logger.info "Retrying #{attempt.ordinalize} time(waiting for #{wait.round(3)} seconds)..."
       }
     )
-    thread_pool = ThreadPool.new(50)
+    thread_pool = ThreadPool.new(100)
     user_count = User.count
     article_count = Article.count
 
     logger.info 'Start'
     thread_pool.start
 
-    10_000_000.times.each_slice(2_000) do |chunk|
+    10_000_000.times.each_slice(5_000) do |chunk|
       thread_pool.perform do
         users = chunk.map do |i|
           user_no = user_count + i + 1
