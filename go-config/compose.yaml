@@ -6,6 +6,7 @@ services:
     volumes:
       - ..:/app
     working_dir: /app/go-config
+    init: true
     command: sleep infinity
     environment:
       CLONE_DB_HOST: clone-db
