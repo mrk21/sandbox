@@ -1,0 +1,8 @@
+export DOCKER_HOST_APP_PORT=3000
+export DOCKER_HOST_DB_PORT=3306
+
+# GCP
+export PROJECT_ID=
+export EMAIL_ADDRESS=
+export ROLE=roles/editor
+export SERVICE_ACCOUNT_NAME=pubsub-test

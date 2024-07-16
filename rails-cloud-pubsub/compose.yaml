@@ -1,0 +1,62 @@
+---
+services:
+  app_base:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    init: true
+    command: sleep infinity
+    volumes:
+      - type: bind
+        source: ..
+        target: /sandbox
+      - type: volume
+        source: cache
+        target: /app/tmp/cache
+      - type: volume
+        source: node_modules
+        target: /app/node_modules
+      - type: volume
+        source: bundle
+        target: /usr/local/bundle
+    environment:
+      DB_HOST: db
+      PROJECT_ID: ${PROJECT_ID}
+
+  app:
+    extends:
+      service: app_base
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "
+        rm -rf tmp/pids/server.pid &&
+        bundle exec rails s -b 0.0.0.0 -p 3000
+      "
+    ports:
+      - target: 3000
+        published: ${DOCKER_HOST_APP_PORT:-3000}
+
+  db:
+    image: mysql:8
+    volumes:
+      - type: volume
+        source: mysql_data
+        target: /var/lib/mysql
+    ports:
+      - target: 3306
+        published: ${DOCKER_HOST_DB_PORT:-3306}
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 1s
+      timeout: 20s
+      retries: 20
+
+volumes:
+  mysql_data:
+  bundle:
+  node_modules:
+  cache:

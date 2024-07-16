@@ -1,0 +1,17 @@
+// See: Dev Container metadata reference https://containers.dev/implementors/json_reference/
+{
+  "name": "rails-cloud-pubsub",
+  "dockerComposeFile": ["../compose.yaml"],
+  "service": "app_base",
+  "remoteUser": "root",
+  "workspaceFolder": "/sandbox/rails-cloud-pubsub",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.ruby",
+        "eamodio.gitlens",
+        "GitHub.copilot"
+      ]
+    }
+  }
+}
