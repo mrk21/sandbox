@@ -1,0 +1,20 @@
+{
+  "name": "ts-jev",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/index.ts",
+    "check-key": "node src/check-key.ts",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}
