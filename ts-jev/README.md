@@ -46,6 +46,14 @@ op run -- node src/examples/batch-triage.ts      # 問い合わせの一括振�
 op run -- node src/examples/image-inspection.ts photo.jpg  # 編みぐるみ判定 + box (jev-preview, experimental)
 ```
 
+## Latency
+
+```sh
+# SDK のログで API 呼び出しごとの所要時間を表示 (debug にするとヘッダー・本体も出る)
+TYPESAFE_LOG_LEVEL=info op run -- node src/examples/rag-judge.ts
+# => [typesafe-sdk] #1 POST /v1/systemone <- 200 in 319ms (request req_...)
+```
+
 ## Memo
 
 ```sh
